@@ -3,13 +3,16 @@
 
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 int verificarArgumentos(int argc, char* argv[]);
 string lerArquivo(string arquivo);
+void dumpMap(const map<int, vector<string>>& linhas);
 
 #endif  // UTILITARIOS_H

@@ -48,3 +48,13 @@ string lerArquivo(string arquivo) {
 
   return conteudo;
 }
+
+void dumpMap(const map<int, vector<string>>& linhas) {
+  for (auto it = linhas.begin(); it != linhas.end(); ++it) {
+    cout << it->first << " => ";
+    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+      cout << *it2 << " ";
+    }
+    cout << endl;
+  }
+}

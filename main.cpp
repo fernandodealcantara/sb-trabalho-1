@@ -3,8 +3,9 @@
 #include <regex>
 #include <stdexcept>
 #include <vector>
-#include "utilitarios.h"
+
 #include "pre.h"
+#include "utilitarios.h"
 // O executável deve ser chamado de MONTADOR. E deve ter 3 modos de uso. Deve
 // ser possível chamar por linha de comando da seguinte forma: ./montador -<op>
 // <arquivo> O arquivo de entrada deve ser indicado SEM extensão e o arquivo de
@@ -28,7 +29,7 @@ int main(int argc, char* argv[]) {
   string arquivo_entrada = nome_arquivo + ".asm";
   string conteudo = lerArquivo(arquivo_entrada);
 
-  map<int, vector<string>> linhas = separarLinhas(conteudo);
+  map<int, vector<string>> linhas = processarLinhas(conteudo);
 
   linhas = processarEquates(linhas);
   linhas = processarIfs(linhas);
@@ -37,14 +38,7 @@ int main(int argc, char* argv[]) {
     analiseLexica(it->first, it->second);
   }
 
-  // show map
-  for (auto it = linhas.begin(); it != linhas.end(); ++it) {
-    cout << it->first << " => ";
-    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-      cout << *it2 << " ";
-    }
-    cout << endl;
-  }
+  dumpMap(linhas);
 
   return 0;
 }
@@ -101,5 +95,3 @@ void analiseLexica(const int linha, const vector<string> tokens) {
     }
   }
 }
-
-

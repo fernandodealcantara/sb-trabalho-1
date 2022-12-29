@@ -1,6 +1,6 @@
 #include "pre.h"
 
-map<int, vector<string>> separarLinhas(string conteudo) {
+map<int, vector<string>> processarLinhas(string conteudo) {
   // Imprima o conteúdo linha a linha
   istringstream stream(conteudo);
   // mostrar o conteudo do arquivo
@@ -24,9 +24,8 @@ map<int, vector<string>> separarLinhas(string conteudo) {
 // tokens validos
 vector<string> tokenize(const string& str) {
   vector<string> tokens;
-  map<int, vector<string>> linhas;
   string token;
-  bool in_comment = false;
+
   int i = 0;
   for (char c : str) {
     if (c == ';') {
@@ -66,7 +65,7 @@ map<int, vector<string>> processarEquates(const map<int, vector<string>>& linhas
     if (linha.second[0] == "SECTION") {
       break;
     }
-    // se for EQU, adicionar ao map linha.fist = label, linha.second[3] = value,
+    // se for EQU, adicionar ao map linha.second[0] = label, linha.second[3] = value,
     vector<string> tokens = linha.second;
     if (regex_match(tokens[0], label) && tokens[1] == ":" && regex_match(tokens[2], equ) &&
         regex_match(tokens[3], value)) {
@@ -92,13 +91,11 @@ map<int, vector<string>> processarEquates(const map<int, vector<string>>& linhas
   return linhasProcessadas;
 }
 
-
 map<int, vector<string>> processarIfs(const map<int, vector<string>>& linhas) {
   // se for IF, verificar se o valor é 0, se for, ignorar a linha seguinte, do contrario, ignorar a
   // linha do IF
 
   map<int, vector<string>> linhasProcessadas;
-  vector<int> linhasIf;
   vector<int> linhasIgnorar;
 
   regex ifRegex("IF|if");
@@ -106,8 +103,8 @@ map<int, vector<string>> processarIfs(const map<int, vector<string>>& linhas) {
   for (const auto& linha : linhas) {
     vector<string> tokens = linha.second;
     if (regex_match(tokens[0], ifRegex)) {
-      linhasIf.push_back(linha.first);
-      if (tokens[1] == "0") {
+      linhasIgnorar.push_back(linha.first);
+      if (stoi(tokens[1]) == 0) {
         linhasIgnorar.push_back(linha.first + 1);
       }
     }
