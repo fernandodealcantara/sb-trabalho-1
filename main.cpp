@@ -33,6 +33,8 @@ int main(int argc, char* argv[]) {
 
   linhas = processarEquates(linhas);
   linhas = processarIfs(linhas);
+  salvarArquivo(nome_arquivo + ".pre", linhas);
+  
   // analise lexica
   for (auto it = linhas.begin(); it != linhas.end(); ++it) {
     analiseLexica(it->first, it->second);

@@ -49,6 +49,25 @@ string lerArquivo(string arquivo) {
   return conteudo;
 }
 
+void salvarArquivo(string arquivo, map<int, vector<string>> linhas) {
+  // Abra o arquivo em modo de escrita texto
+  ofstream file(arquivo);
+  if (!file.is_open()) {
+    throw runtime_error("Error opening file");
+  }
+
+  // Escreva o conteúdo do arquivo
+  for (auto it = linhas.begin(); it != linhas.end(); ++it) {
+    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+      file << *it2 << " ";
+    }
+    file << endl;
+  }
+
+  // Feche o arquivo
+  file.close();
+}
+
 void dumpMap(const map<int, vector<string>>& linhas) {
   for (auto it = linhas.begin(); it != linhas.end(); ++it) {
     cout << it->first << " => ";
