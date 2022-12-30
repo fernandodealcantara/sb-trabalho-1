@@ -15,8 +15,10 @@ using namespace std;
 
 int verificarArgumentos(int argc, char* argv[]);
 string lerArquivo(string arquivo);
-void salvarArquivo(string arquivo, const LinhaMap& linhas);
+void salvarArquivo(string arquivo, const Codigo& codigo);
 void dumpMap(const LinhaMap& linhas);
 void dumpMnt(const MNTMap& mnt);
+void dumpCodigo(const Codigo& codigo);
+void dumpLinhaCodigo(const LinhaCodigo& linha);
 
 #endif  // UTILITARIOS_H

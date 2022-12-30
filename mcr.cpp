@@ -1,244 +1,103 @@
 #include "mcr.h"
 
-LinhaMap processarMacros(LinhaMap& linhas) {
-  LinhaMap mdt;
+Codigo processarMacros(const Codigo& codigo) {
+  Codigo mdt, codigoSemMacros;
   MNTMap mnt;
-
-  gerarMntMdt(linhas, mnt, mdt);
-
-  LinhaMap linhasProcessadas = substituirMacros(linhas, mdt, mnt);
-
-  return linhasProcessadas;
-}
-
-void gerarMntMdt(LinhaMap& linhas, MNTMap& mnt, LinhaMap& mdt) {
-  // encontrar macros e salvar na MDT e MNT
-  // substituir macros por chamadas
-  // substituir chamadas por conteudo da MDT
-  // encontrar macros
-
-  for (auto it = linhas.begin(); it != linhas.end(); ++it) {
-    vector<string> tokens = it->second;
-    // Teste: macro &A, &B, &C
-    if (tokens.size() >= 3 && regex_match(tokens[0], reLabel) && tokens[1] == ":" &&
-        regex_match(tokens[2], reMacro)) {
-      // encontrou macro
-      string nomeMacro = tokens[0];
-      int inicioMacro = it->first;
-      map<string, string> parametros;
-      // salvar parametros da macro na MNT e contar numero de parametros
-      mnt[nomeMacro].numArgs = 0;
-      for (int i = 3; i < tokens.size(); ++i) {
-        if (regex_match(tokens[i], reMacroParam)) {
-          parametros[tokens[i]] = "#" + to_string(mnt[nomeMacro].numArgs + 1);
-          ++mnt[nomeMacro].numArgs;
-        }
-      }
-      // salvar conteudo da macro na MDT
-      ++it;
-      mnt[nomeMacro].linha = it->first;  // salvar inicio da macro na MNT
-      // enquanto não for final da macro
-      while (it != linhas.end() && !regex_match(it->second[0], reEndmacro)) {
-        // substituir parametros por numeros
-        vector<string> tokensMacro = it->second;
-        for (int i = 0; i < tokensMacro.size(); ++i) {
-          if (parametros.find(tokensMacro[i]) != parametros.end()) {
-            tokensMacro[i] = parametros[tokensMacro[i]];
-          }
-        }
-        mdt[it->first] = tokensMacro;
-        ++it;
-      }
-      mdt[it->first] = it->second;  // salvar final da macro na MDT (endmacro)
-      int fimMacro = it->first;
-      // remover macro da lista de linhas
-      for (int i = inicioMacro; i <= fimMacro; ++i) {
-        linhas.erase(i);
-      }
-    }
-    // Teste: {enter} macro &A, &B, &C
-    else if (tokens.size() == 2 && regex_match(tokens[0], reLabel) && tokens[1] == ":") {
-      string nomeMacro = tokens[0];
-      int inicioMacro = it->first;
-      ++it;
-      tokens = it->second;
-      // macro &A, &B, &C
-      if (tokens.size() >= 1 && regex_match(tokens[0], reMacro)) {
+  // gerar mnt e mdt
+  for (auto linha = codigo.begin(); linha != codigo.end(); ++linha) {
+    if (linha->size() >= 2 && regex_match(linha->at(0), reLabel) && linha->at(1) == ":") {
+      string label = linha->at(0);
+      int inicioMacro = linha - codigo.begin();
+      ++linha;
+      if (linha->size() >= 1 && regex_match(linha->at(0), reMacro)) {
         map<string, string> parametros;
-        // salvar parametros da macro na MNT e contar numero de parametros
-        mnt[nomeMacro].numArgs = 0;
-        for (int i = 1; i < tokens.size(); ++i) {
-          if (regex_match(tokens[i], reMacroParam)) {
-            parametros[tokens[i]] = "#" + to_string(mnt[nomeMacro].numArgs + 1);
-            ++mnt[nomeMacro].numArgs;
+        mnt[label].numArgs = 0;
+        for (int i = 1; i < linha->size(); ++i) {
+          if (regex_match(linha->at(i), reMacroParam)) {
+            parametros[linha->at(i)] = "#" + to_string(mnt[label].numArgs + 1);
+            ++mnt[label].numArgs;
           }
         }
-        // salvar conteudo da macro na MDT
-        ++it;
-        mnt[nomeMacro].linha = it->first;  // salvar inicio da macro na MNT
-        // enquanto não for final da macro
-        while (it != linhas.end() && !regex_match(it->second[0], reEndmacro)) {
-          // substituir parametros por numeros
-          vector<string> tokensMacro = it->second;
-          for (int i = 0; i < tokensMacro.size(); ++i) {
-            if (parametros.find(tokensMacro[i]) != parametros.end()) {
-              tokensMacro[i] = parametros[tokensMacro[i]];
+        ++linha;
+        mnt[label].linha = mdt.size();
+        while (linha != codigo.end() && linha->size() >= 1 &&
+               !regex_match(linha->at(0), reEndmacro)) {
+          LinhaCodigo linhaMacro = *linha;
+          for (int i = 0; i < linhaMacro.size(); ++i) {
+            if (parametros.find(linhaMacro[i]) != parametros.end()) {
+              linhaMacro[i] = parametros[linhaMacro[i]];
             }
           }
-          mdt[it->first] = tokensMacro;
-          ++it;
+          mdt.push_back(linhaMacro);
+          ++linha;
         }
-        mdt[it->first] = it->second;  // salvar final da macro na MDT (endmacro)
-        int fimMacro = it->first;
-        // remover macro da lista de linhas
-        for (int i = inicioMacro; i <= fimMacro; ++i) {
-          linhas.erase(i);
-        }
+        mdt.push_back(*linha);  // adiciona endmacro
+        int fimMacro = linha - codigo.begin() + 1;
+      } else {
+        --linha;
+        codigoSemMacros.push_back(*linha);
       }
+    } else {
+      codigoSemMacros.push_back(*linha);
     }
   }
+
+  // substituir chamadas de macros
+  return subtituirMacros(codigoSemMacros, mnt, mdt);
 }
 
-LinhaMap substituirMacros(LinhaMap& linhas, LinhaMap& mdt, MNTMap& mnt) {
-  LinhaMap linhasProcessadas, linhasReprocessadas;
-  // substituir chamada de macro por chamada
-  int indexLinhaProcessada = 1, indexLinhaReprocessada = 1;
-  int indexInicioInsercao;
-  int terminou_processamento = 0;
-  // pegar primeira linha da lista de linhas
-  auto it = linhas.begin();
-  LinhaMap::iterator it2;
+Codigo subtituirMacros(const Codigo& codigo, const MNTMap& mnt, const Codigo& mdt) {
+  Codigo codigoProcessado, pilhaMDT, corpoMDT;
+  auto linha = codigo.begin();
+  while (1) {
+    while (pilhaMDT.size() > 0) {
+      // copiar topo da pilha para variavel
+      LinhaCodigo linhaPilha = pilhaMDT.back();
+      pilhaMDT.pop_back();
 
-  while (!terminou_processamento) {
-    if (it != linhas.end()) {
-      indexInicioInsercao = indexLinhaProcessada;
-      vector<string> tokens = it->second;
+      if (linhaPilha.size() >= 1 && regex_match(linhaPilha.at(0), reLabel) &&
+          mnt.find(linhaPilha.at(0)) != mnt.end()) {
+        corpoMDT.clear();
 
-      // procurar macros
-      // substituir macros por chamadas
-      // Teste: Macro1 1, 2
-      if (tokens.size() >= 3 && regex_match(tokens[0], reLabel) && tokens[1] == ":" &&
-          regex_match(tokens[2], reLabel) && mnt.find(tokens[2]) != mnt.end()) {
-        // encontrou macro
-        // substituir chamadas por conteudo da MDT
-        string nomeMacro = tokens[2];      // LABEL1: MACRO1 1, 2
-        int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
+        int linhaMacro = mnt.at(linhaPilha.at(0)).linha;
 
-        // salvar label
-        linhasProcessadas[indexLinhaProcessada++] = {tokens[0], tokens[1]};
+        while (linhaMacro < mdt.size() && !regex_match(mdt[linhaMacro][0], reEndmacro)) {
+          corpoMDT.push_back(mdt[linhaMacro]);
+          ++linhaMacro;
+        }
 
-        while (!regex_match(mdt[linha][0], reEndmacro)) {
-          vector<string> tokensMacro = mdt[linha];
-          // substituir parametros da macro
-          for (int i = 0; i < tokensMacro.size(); ++i) {
-            if (regex_match(tokensMacro[i], reParametro)) {
+        // substituir parametros
+        for (int i = 0; i < corpoMDT.size(); ++i) {
+          for (int j = 0; j < corpoMDT[i].size(); ++j) {
+            if (regex_match(corpoMDT[i][j], reParametro)) {
               // encontrou parametro
               // substituir parametro por valor
-              int indexParametro = stoi(tokensMacro[i].substr(1));
-              tokensMacro[i] = tokens[indexParametro + 2];
+              int indexParametro = stoi(corpoMDT[i][j].substr(1));
+              corpoMDT[i][j] = linhaPilha.at(indexParametro);
             }
           }
-          linhasProcessadas[indexLinhaProcessada] = tokensMacro;
-          ++indexLinhaProcessada;
-          ++linha;
         }
-      } else if (tokens.size() >= 1 && regex_match(tokens[0], reLabel) &&
-                 mnt.find(tokens[0]) != mnt.end()) {
-        // encontrou macro
-        // substituir chamadas por conteudo da MDT
-        string nomeMacro = tokens[0];      // MACRO1 ONE, DOIS
-        int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
 
-        while (!regex_match(mdt[linha][0], reEndmacro)) {
-          vector<string> tokensMacro = mdt[linha];
-          // substituir parametros da macro
-          for (int i = 0; i < tokensMacro.size(); ++i) {
-            if (regex_match(tokensMacro[i], reParametro)) {
-              // encontrou parametro
-              // substituir parametro por valor
-              int indexParametro = stoi(tokensMacro[i].substr(1));
-              tokensMacro[i] = tokens[indexParametro];
-            }
-          }
-          linhasProcessadas[indexLinhaProcessada] = tokensMacro;
-          ++indexLinhaProcessada;
-          ++linha;
+        // empilhar corpo da macro
+        for (int i = corpoMDT.size() - 1; i >= 0; --i) {
+          pilhaMDT.push_back(corpoMDT[i]);
         }
+
       } else {
-        linhasProcessadas[indexLinhaProcessada] = tokens;
-        ++indexLinhaProcessada;
+        codigoProcessado.push_back(linhaPilha);
       }
-      // ir para proxima linha
-      ++it;
+    }
 
+    if (linha == codigo.end()) break;
+
+    if (linha->size() >= 1 && regex_match(linha->at(0), reLabel) &&
+        mnt.find(linha->at(0)) != mnt.end()) {
+      pilhaMDT.push_back(*linha);
     } else {
-      terminou_processamento = 1;
+      codigoProcessado.push_back(*linha);
     }
-    // verificar se existe macro nas linhas processadas, se sim, deve processar os macros novamente
-    // substituir chamadas por conteudo da MDT
-
-    it2 = linhasProcessadas.find(indexInicioInsercao);
-
-    while (it2 != linhasProcessadas.end() && !terminou_processamento) {
-      vector<string> tokens = it2->second;
-
-      // procurar macros
-      // substituir macros por chamadas
-      // Teste: Macro1 1, 2
-      if (tokens.size() >= 3 && regex_match(tokens[0], reLabel) && tokens[1] == ":" &&
-          regex_match(tokens[2], reLabel) && mnt.find(tokens[2]) != mnt.end()) {
-        // encontrou macro
-        // substituir chamadas por conteudo da MDT
-        string nomeMacro = tokens[2];      // LABEL1: MACRO1 1, 2
-        int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
-
-        // salvar label
-        linhasReprocessadas[indexLinhaReprocessada++] = {tokens[0], tokens[1]};
-
-        while (!regex_match(mdt[linha][0], reEndmacro)) {
-          vector<string> tokensMacro = mdt[linha];
-          // substituir parametros da macro
-          for (int i = 0; i < tokensMacro.size(); ++i) {
-            if (regex_match(tokensMacro[i], reParametro)) {
-              // encontrou parametro
-              // substituir parametro por valor
-              int indexParametro = stoi(tokensMacro[i].substr(1));
-              tokensMacro[i] = tokens[indexParametro + 2];
-            }
-          }
-          linhasReprocessadas[indexLinhaReprocessada] = tokensMacro;
-          ++indexLinhaReprocessada;
-          ++linha;
-        }
-      } else if (tokens.size() >= 1 && regex_match(tokens[0], reLabel) &&
-                 mnt.find(tokens[0]) != mnt.end()) {
-        // encontrou macro
-        // substituir chamadas por conteudo da MDT
-        string nomeMacro = tokens[0];      // MACRO1 ONE, DOIS
-        int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
-
-        while (!regex_match(mdt[linha][0], reEndmacro)) {
-          vector<string> tokensMacro = mdt[linha];
-          // substituir parametros da macro
-          for (int i = 0; i < tokensMacro.size(); ++i) {
-            if (regex_match(tokensMacro[i], reParametro)) {
-              // encontrou parametro
-              // substituir parametro por valor
-              int indexParametro = stoi(tokensMacro[i].substr(1));
-              tokensMacro[i] = tokens[indexParametro];
-            }
-          }
-          linhasReprocessadas[indexLinhaReprocessada] = tokensMacro;
-          ++indexLinhaReprocessada;
-          ++linha;
-        }
-      } else {
-        linhasReprocessadas[indexLinhaReprocessada] = tokens;
-        ++indexLinhaReprocessada;
-      }
-      ++it2;
-    }
+    ++linha;
   }
 
-  return linhasReprocessadas;
+  return codigoProcessado;
 }

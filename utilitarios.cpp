@@ -49,16 +49,16 @@ string lerArquivo(string arquivo) {
   return conteudo;
 }
 
-void salvarArquivo(string arquivo, const LinhaMap& linhas) {
+void salvarArquivo(string arquivo, const Codigo& codigo) {
   // Abra o arquivo em modo de escrita texto
   ofstream file(arquivo);
   if (!file.is_open()) {
     throw runtime_error("Error opening file");
   }
 
-  // Escreva o conteúdo do arquivo
-  for (auto it = linhas.begin(); it != linhas.end(); ++it) {
-    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+  // Escreva o conteúdo do código no arquivo
+  for (auto it = codigo.begin(); it != codigo.end(); ++it) {
+    for (auto it2 = it->begin(); it2 != it->end(); ++it2) {
       file << *it2 << " ";
     }
     file << endl;
@@ -80,6 +80,23 @@ void dumpMap(const LinhaMap& linhas) {
 
 void dumpMnt(const MNTMap& mnt) {
   for (auto it = mnt.begin(); it != mnt.end(); ++it) {
-    cout << it->first << " => N args: " << it->second.numArgs << " Linha:" << it->second.linha << endl;
+    cout << it->first << " => N args: " << it->second.numArgs << " Linha:" << it->second.linha
+         << endl;
   }
+}
+
+void dumpCodigo(const Codigo& codigo) {
+  for (auto it = codigo.begin(); it != codigo.end(); ++it) {
+    for (auto it2 = it->begin(); it2 != it->end(); ++it2) {
+      cout << *it2 << " ";
+    }
+    cout << endl;
+  }
+}
+
+void dumpLinhaCodigo(const LinhaCodigo& linha) {
+  for (auto it = linha.begin(); it != linha.end(); ++it) {
+    cout << *it << " - ";
+  }
+  cout << endl;
 }

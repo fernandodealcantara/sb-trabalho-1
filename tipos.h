@@ -2,13 +2,17 @@
 #define TIPOS_H
 
 #include <map>
+#include <regex>
 #include <string>
 #include <vector>
-#include <regex>
 
 using namespace std;
 
 typedef map<int, vector<string>> LinhaMap;
+
+typedef vector<string> LinhaCodigo;
+
+typedef vector<LinhaCodigo> Codigo;
 
 // Macro Name Table
 typedef struct {
@@ -27,7 +31,6 @@ extern string lowercaseSections;
 extern string labels;
 extern string values;
 extern string separators;
-
 
 extern regex reAdd;
 extern regex reSub;

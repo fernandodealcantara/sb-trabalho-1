@@ -1,29 +1,37 @@
 #include "pre.h"
 
-LinhaMap processarLinhas(string conteudo) {
+Codigo processarLinhas(string conteudo) {
   // Imprima o conteúdo linha a linha
   istringstream stream(conteudo);
   // mostrar o conteudo do arquivo
   string linha;
-  LinhaMap linhas;
+  Codigo codigo;
   while (getline(stream, linha)) {
-    linhas.insert(pair<int, vector<string>>(linhas.size() + 1, tokenize(linha)));
-  }
+    // se não for vazio, adicionar ao codigo
+    LinhaCodigo linha_codigo = tokenize(linha);
+    // quebrar label e instrucaao em linhas diferentes
+    if (linha_codigo.size() > 2 && !regex_match(linha_codigo[2], reSpace) &&
+        !regex_match(linha_codigo[2], reConst)) {
+      if (linha_codigo[1] == ":") {
+        LinhaCodigo linha_label;
+        linha_label.push_back(linha_codigo[0]);
+        linha_label.push_back(linha_codigo[1]);
+        codigo.push_back(linha_label);
+        linha_codigo.erase(linha_codigo.begin(), linha_codigo.begin() + 2);
+      }
+    }
 
-  // remover vetores vazios
-  for (auto it = linhas.begin(); it != linhas.end();) {
-    if (it->second.empty()) {
-      it = linhas.erase(it);
-    } else {
-      ++it;
+    if (!linha_codigo.empty()) {
+      codigo.push_back(linha_codigo);
     }
   }
-  return linhas;
+
+  return codigo;
 }
 
 // tokens validos
-vector<string> tokenize(const string& str) {
-  vector<string> tokens;
+LinhaCodigo tokenize(const string& str) {
+  LinhaCodigo tokens;
   string token;
 
   int i = 0;
@@ -51,82 +59,81 @@ vector<string> tokenize(const string& str) {
   return tokens;
 }
 
-LinhaMap processarEquates(const LinhaMap& linhas) {
-  LinhaMap linhasProcessadas;
+Codigo processarEquates(const Codigo& codigo) {
+  Codigo codigoProcessado;
   map<string, string> equMap;
   vector<int> linhasIgnorar;
 
-  for (auto linha = linhas.begin(); linha != linhas.end(); ++linha) {
+  for (auto linha = codigo.begin(); linha != codigo.end(); ++linha) {
+    LinhaCodigo linha_codigo = *linha;
     // percerrer até encontrar SECTION
-    if (regex_match(linha->second[0], reSection) && regex_match(linha->second[1], reText)) {
+    if (linha_codigo.size() >= 2 && regex_match(linha_codigo[0], reSection) &&
+        regex_match(linha_codigo[1], reText)) {
       break;
     }
-    // se for EQU, adicionar ao map linha.second[0] = label, linha.second[3] = value,
-    // considerar label: enter EQU value
-
-    vector<string> tokens = linha->second;
-    if (tokens.size() == 4 && regex_match(tokens[0], reLabel) && tokens[1] == ":" &&
-        regex_match(tokens[2], reEqu) && regex_match(tokens[3], reValue) &&
-        equMap.find(tokens[0]) == equMap.end()) {
-      equMap[tokens[0]] = tokens[3];
-      linhasIgnorar.push_back(linha->first);
-    }
-    if (tokens.size() == 2 && regex_match(tokens[0], reLabel) && tokens[1] == ":") {
-      string label = tokens[0];
-      int linhaLabel = linha->first;
+    if (linha_codigo.size() == 2 && regex_match(linha_codigo[0], reLabel) &&
+        linha_codigo[1] == ":") {
+      string label = linha_codigo[0];
+      int linhaLabel = linha - codigo.begin();
       ++linha;
-      if (linha == linhas.end()) {
+      if (linha == codigo.end()) {
         break;
       }
 
-      tokens = linha->second;
-      if (tokens.size() == 2 && regex_match(tokens[0], reEqu) && regex_match(tokens[1], reValue)) {
-        equMap[label] = tokens[1];
+      linha_codigo = *linha;
+      if (linha_codigo.size() == 2 && regex_match(linha_codigo[0], reEqu) &&
+          regex_match(linha_codigo[1], reValue)) {
+        equMap[label] = linha_codigo[1];
         linhasIgnorar.push_back(linhaLabel);
-        linhasIgnorar.push_back(linha->first);
+        linhasIgnorar.push_back(linha - codigo.begin());
       }
     }
   }
 
-  // substituir EQU por valor e ignorar linhas EQU
-  for (const auto& linha : linhas) {
-    if (find(linhasIgnorar.begin(), linhasIgnorar.end(), linha.first) != linhasIgnorar.end()) {
+  for (int i = 0; i < codigo.size(); ++i) {
+    if (find(linhasIgnorar.begin(), linhasIgnorar.end(), i) != linhasIgnorar.end()) {
       continue;
     }
-    vector<string> tokens = linha.second;
-    for (int i = 0; i < tokens.size(); i++) {
-      if (equMap.find(tokens[i]) != equMap.end()) {
-        tokens[i] = equMap[tokens[i]];
+    LinhaCodigo linha_codigo = codigo[i];
+    for (int j = 0; j < linha_codigo.size(); ++j) {
+      if (equMap.find(linha_codigo[j]) != equMap.end()) {
+        linha_codigo[j] = equMap[linha_codigo[j]];
       }
     }
-    linhasProcessadas[linha.first] = tokens;
+    codigoProcessado.push_back(linha_codigo);
   }
 
-  return linhasProcessadas;
+  return codigoProcessado;
 }
 
-LinhaMap processarIfs(const LinhaMap& linhas) {
-  // se for IF, verificar se o valor é 0, se for, ignorar a linha seguinte, do contrario, ignorar a
-  // linha do IF
-  LinhaMap linhasProcessadas;
+Codigo processarIfs(const Codigo& codigo) {
+  Codigo codigoProcessado;
   vector<int> linhasIgnorar;
 
-  for (const auto& linha : linhas) {
-    vector<string> tokens = linha.second;
-    if (regex_match(tokens[0], reIf)) {
-      linhasIgnorar.push_back(linha.first);
-      if (regex_match(tokens[1], reValue) && stoi(tokens[1]) == 0) {
-        linhasIgnorar.push_back(linha.first + 1);
+  for (auto linha = codigo.begin(); linha != codigo.end(); ++linha) {
+    LinhaCodigo linha_codigo = *linha;
+
+    if (linha_codigo.size() >= 2 && regex_match(linha_codigo[0], reIf)) {
+      int linhaIf = linha - codigo.begin();
+      linhasIgnorar.push_back(linhaIf);
+
+      if (regex_match(linha_codigo[1], reValue) && stoi(linha_codigo[1]) == 0) {
+        ++linha;
+        if (linha == codigo.end()) {
+          break;
+        }
+        linha_codigo = *linha;
+        linhasIgnorar.push_back(linha - codigo.begin());
       }
     }
   }
 
-  for (const auto& linha : linhas) {
-    if (find(linhasIgnorar.begin(), linhasIgnorar.end(), linha.first) != linhasIgnorar.end()) {
+  for (int i = 0; i < codigo.size(); ++i) {
+    if (find(linhasIgnorar.begin(), linhasIgnorar.end(), i) != linhasIgnorar.end()) {
       continue;
     }
-    linhasProcessadas[linha.first] = linha.second;
+    codigoProcessado.push_back(codigo[i]);
   }
 
-  return linhasProcessadas;
+  return codigoProcessado;
 }

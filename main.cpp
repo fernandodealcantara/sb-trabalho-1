@@ -24,7 +24,6 @@ using namespace std;
 
 map<string, int> obterOpcodesNumericos();
 void analiseLexica(const int linha, const vector<string> tokens);
-LinhaMap processarMacros(LinhaMap& linhas);
 
 int main(int argc, char* argv[]) {
   auto instructions = obterOpcodesNumericos();
@@ -33,30 +32,30 @@ int main(int argc, char* argv[]) {
   string nome_arquivo = argv[2];
   string conteudo = lerArquivo(nome_arquivo + ".asm");
 
-  LinhaMap linhas = processarLinhas(conteudo);
+  Codigo codigo = processarLinhas(conteudo);
 
-  linhas = processarEquates(linhas);
-  linhas = processarIfs(linhas);
+  codigo = processarEquates(codigo);
+  codigo = processarIfs(codigo);
 
   if (op == 'p') {
-    salvarArquivo(nome_arquivo + ".pre", linhas);
+    salvarArquivo(nome_arquivo + ".pre", codigo);
     // return 0;
   }
 
-  linhas = processarMacros(linhas);
+  codigo = processarMacros(codigo);
 
   if (op == 'm') {
-    salvarArquivo(nome_arquivo + ".mcr", linhas);
+    salvarArquivo(nome_arquivo + ".mcr", codigo);
     // return 0;
   }
 
   // analise lexica
-  for (auto it = linhas.begin(); it != linhas.end(); ++it) {
-    analiseLexica(it->first, it->second);
-  }
+  // for (auto it = linhas.begin(); it != linhas.end(); ++it) {
+  //   analiseLexica(it->first, it->second);
+  // }
 
-  dumpMap(linhas);
-
+  dumpCodigo(codigo);
+  
   return 0;
 }
 
