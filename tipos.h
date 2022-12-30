@@ -14,7 +14,6 @@ typedef map<int, vector<string>> LinhaMap;
 typedef struct {
   int numArgs;
   int linha;
-  int qtdLinhas;
 } Macro;
 
 typedef map<string, Macro> MNTMap;
@@ -63,5 +62,6 @@ extern regex reSymbolPlusValue;
 extern regex reSeparator;
 extern regex reComment;
 extern regex reMacroParam;
+extern regex reParametro;
 
 #endif  // TIPOS_H

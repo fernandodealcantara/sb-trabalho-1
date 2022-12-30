@@ -55,3 +55,4 @@ regex reSymbolPlusValue("[A-Za-z]+\\+[0-9]+");
 regex reSeparator(":|,");
 regex reComment(";.*");
 regex reMacroParam("&[A-Za-z][A-Za-z0-9_]*[^_]?");
+regex reParametro("#[0-9]+");

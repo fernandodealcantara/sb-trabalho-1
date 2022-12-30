@@ -45,12 +45,17 @@ int main(int argc, char* argv[]) {
 
   linhas = processarMacros(linhas);
 
+  if (op == 'm') {
+    salvarArquivo(nome_arquivo + ".mcr", linhas);
+    // return 0;
+  }
+
   // analise lexica
   for (auto it = linhas.begin(); it != linhas.end(); ++it) {
     analiseLexica(it->first, it->second);
   }
 
-  // dumpMap(linhas);
+  dumpMap(linhas);
 
   return 0;
 }
@@ -90,113 +95,150 @@ void analiseLexica(const int linha, const vector<string> tokens) {
   }
 }
 
-LinhaMap processarMacros(LinhaMap& linhas) {
-  LinhaMap linhasProcessadas, mdt;
-  MNTMap mnt;
+// LinhaMap processarMacros(LinhaMap& linhas) {
+//   LinhaMap linhasProcessadas, linhasReprocessadas, mdt;
+//   MNTMap mnt;
 
-  mntMdt(linhas, mnt, mdt);
+//   gerarMntMdt(linhas, mnt, mdt);
 
-  std::cout << "Linhas " << endl;
-  dumpMap(linhas);
-  std::cout << "---------- MNT ----------" << endl;
-  dumpMnt(mnt);
-  std::cout << "---------- MDT ----------" << endl;
-  dumpMap(mdt);
+//   // substituir chamada de macro por chamada
+//   int indexLinhaProcessada = 1, indexLinhaReprocessada = 1;
+//   int indexInicioInsercao;
+//   int terminou_processamento = 0;
+//   // pegar primeira linha da lista de linhas
+//   auto it = linhas.begin();
+//   LinhaMap::iterator it2;
 
-  // substituir chamada de macro por chamada
-  int indexLinhaProcessada = 1;
-  int indexInicioInsercao;
-  int terminou_processamento = 0;
-  // pegar primeira linha da lista de linhas
-  auto it = linhas.begin();
+//   while (!terminou_processamento) {
+//     if (it != linhas.end()) {
+//       indexInicioInsercao = indexLinhaProcessada;
+//       vector<string> tokens = it->second;
 
-  while (!terminou_processamento) {
-    if (it != linhas.end()) {
-      indexInicioInsercao = indexLinhaProcessada;
-      vector<string> tokens = it->second;
+//       // procurar macros
+//       // substituir macros por chamadas
+//       // Teste: Macro1 1, 2
+//       if (tokens.size() >= 3 && regex_match(tokens[0], reLabel) && tokens[1] == ":" &&
+//           regex_match(tokens[2], reLabel) && mnt.find(tokens[2]) != mnt.end()) {
+//         // encontrou macro
+//         // substituir chamadas por conteudo da MDT
+//         string nomeMacro = tokens[2];      // LABEL1: MACRO1 1, 2
+//         int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
 
-      // procurar macros
-      // substituir macros por chamadas
-      // Teste: Macro1 1, 2
-      if (tokens.size() >= 3 && regex_match(tokens[0], reLabel) && tokens[1] == ":" &&
-          regex_match(tokens[2], reLabel) && mnt.find(tokens[2]) != mnt.end()) {
-        cout << "Encontrou macro 3" << endl;
-        // encontrou macro
-        // substituir chamadas por conteudo da MDT
-        string nomeMacro = tokens[2];      // LABEL1: MACRO1 1, 2
-        int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
+//         // salvar label
+//         linhasProcessadas[indexLinhaProcessada++] = {tokens[0], tokens[1]};
 
-        while (!regex_match(mdt[linha][0], reEndmacro)) {
-          vector<string> tokensMacro = mdt[linha];
-          // substituir parametros da macro
-          for (int i = 0; i < tokensMacro.size(); ++i) {
-            if (regex_match(tokensMacro[i], reMacroParam)) {
-              int numParam = stoi(tokensMacro[i].substr(1));
-              tokensMacro[i] = tokens[numParam + 2];
-            }
-          }
-          linhasProcessadas[indexLinhaProcessada] = tokensMacro;
-          ++indexLinhaProcessada;
-          ++linha;
-        }
-      } else if (tokens.size() >= 1 && regex_match(tokens[0], reLabel) &&
-                 mnt.find(tokens[0]) != mnt.end()) {
-        cout << "Encontrou macro 1" << endl;
-        // encontrou macro
-        // substituir chamadas por conteudo da MDT
-        string nomeMacro = tokens[0];      // MACRO1 ONE, DOIS
-        int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
+//         while (!regex_match(mdt[linha][0], reEndmacro)) {
+//           vector<string> tokensMacro = mdt[linha];
+//           // substituir parametros da macro
+//           for (int i = 0; i < tokensMacro.size(); ++i) {
+//             if (regex_match(tokensMacro[i], reParametro)) {
+//               // encontrou parametro
+//               // substituir parametro por valor
+//               int indexParametro = stoi(tokensMacro[i].substr(1));
+//               tokensMacro[i] = tokens[indexParametro + 2];
+//             }
+//           }
+//           linhasProcessadas[indexLinhaProcessada] = tokensMacro;
+//           ++indexLinhaProcessada;
+//           ++linha;
+//         }
+//       } else if (tokens.size() >= 1 && regex_match(tokens[0], reLabel) &&
+//                  mnt.find(tokens[0]) != mnt.end()) {
+//         // encontrou macro
+//         // substituir chamadas por conteudo da MDT
+//         string nomeMacro = tokens[0];      // MACRO1 ONE, DOIS
+//         int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
 
-        while (!regex_match(mdt[linha][0], reEndmacro)) {
-          vector<string> tokensMacro = mdt[linha];
-          // substituir parametros da macro
-          for (int i = 0; i < tokensMacro.size(); ++i) {
-            if (regex_match(tokensMacro[i], reMacroParam)) {
-              if(i<tokens.size()-1){
-                cout << "tokensMacro[i]: " << tokensMacro[i] << endl;
-                cout << "tokens[i+1]: " << tokens[i+1] << endl;
-                cout << "tokens[i]: " << tokens[i] << endl;
-                tokensMacro[i] = tokens[i+1];
-              }
-              // encontrar indice do parametro
-              int numParam;
-              for (numParam = 0; numParam < tokens.size(); ++numParam) {
-                if (tokens[numParam] == tokensMacro[i]) break; // one == &a
-              }
-              cout << "numParam: " << numParam << endl;
-              cout << "tokensMacro[i]: " << tokensMacro[i] << endl;
-              // cout << "tokens[numParam]: " << tokens[numParam] << endl;
-              // mostrar tokens
-              for (int i = 0; i < tokens.size(); ++i) {
-                cout << "tokens[" << i << "]: " << tokens[i] << endl;
-              }
-              tokensMacro[i] = tokens[numParam+1];
-            }
-          }
-          linhasProcessadas[indexLinhaProcessada] = tokensMacro;
-          ++indexLinhaProcessada;
-          ++linha;
-        }
-      } else {
-        cout << "Nao encontrou macro" << endl;
-        linhasProcessadas[indexLinhaProcessada] = tokens;
-        ++indexLinhaProcessada;
-      }
-      // ir para proxima linha
-      ++it;
+//         while (!regex_match(mdt[linha][0], reEndmacro)) {
+//           vector<string> tokensMacro = mdt[linha];
+//           // substituir parametros da macro
+//           for (int i = 0; i < tokensMacro.size(); ++i) {
+//             if (regex_match(tokensMacro[i], reParametro)) {
+//               // encontrou parametro
+//               // substituir parametro por valor
+//               int indexParametro = stoi(tokensMacro[i].substr(1));
+//               tokensMacro[i] = tokens[indexParametro];
+//             }
+//           }
+//           linhasProcessadas[indexLinhaProcessada] = tokensMacro;
+//           ++indexLinhaProcessada;
+//           ++linha;
+//         }
+//       } else {
+//         linhasProcessadas[indexLinhaProcessada] = tokens;
+//         ++indexLinhaProcessada;
+//       }
+//       // ir para proxima linha
+//       ++it;
 
-    } else {
-      terminou_processamento = 1;
-    }
-    // verificar se existe macro nas linhas processadas, se sim, repetir o processo para as linhas
-    // processadas
-  }
+//     } else {
+//       terminou_processamento = 1;
+//     }
+//     // verificar se existe macro nas linhas processadas, se sim, deve processar os macros novamente
+//     // substituir chamadas por conteudo da MDT
 
-  // substituir chamadas por conteudo da MDT
+//     it2 = linhasProcessadas.find(indexInicioInsercao);
 
-  // substituir chamadas por conteudo da MDT
+//     while (it2 != linhasProcessadas.end() && !terminou_processamento) {
+//       vector<string> tokens = it2->second;
 
-  std::cout << "---------- Linhas Processadas ----------" << endl;
-  dumpMap(linhasProcessadas);
-  return linhasProcessadas;
-}
+//       // procurar macros
+//       // substituir macros por chamadas
+//       // Teste: Macro1 1, 2
+//       if (tokens.size() >= 3 && regex_match(tokens[0], reLabel) && tokens[1] == ":" &&
+//           regex_match(tokens[2], reLabel) && mnt.find(tokens[2]) != mnt.end()) {
+//         // encontrou macro
+//         // substituir chamadas por conteudo da MDT
+//         string nomeMacro = tokens[2];      // LABEL1: MACRO1 1, 2
+//         int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
+
+//         // salvar label
+//         linhasReprocessadas[indexLinhaReprocessada++] = {tokens[0], tokens[1]};
+
+//         while (!regex_match(mdt[linha][0], reEndmacro)) {
+//           vector<string> tokensMacro = mdt[linha];
+//           // substituir parametros da macro
+//           for (int i = 0; i < tokensMacro.size(); ++i) {
+//             if (regex_match(tokensMacro[i], reParametro)) {
+//               // encontrou parametro
+//               // substituir parametro por valor
+//               int indexParametro = stoi(tokensMacro[i].substr(1));
+//               tokensMacro[i] = tokens[indexParametro + 2];
+//             }
+//           }
+//           linhasReprocessadas[indexLinhaReprocessada] = tokensMacro;
+//           ++indexLinhaReprocessada;
+//           ++linha;
+//         }
+//       } else if (tokens.size() >= 1 && regex_match(tokens[0], reLabel) &&
+//                  mnt.find(tokens[0]) != mnt.end()) {
+//         // encontrou macro
+//         // substituir chamadas por conteudo da MDT
+//         string nomeMacro = tokens[0];      // MACRO1 ONE, DOIS
+//         int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
+
+//         while (!regex_match(mdt[linha][0], reEndmacro)) {
+//           vector<string> tokensMacro = mdt[linha];
+//           // substituir parametros da macro
+//           for (int i = 0; i < tokensMacro.size(); ++i) {
+//             if (regex_match(tokensMacro[i], reParametro)) {
+//               // encontrou parametro
+//               // substituir parametro por valor
+//               int indexParametro = stoi(tokensMacro[i].substr(1));
+//               tokensMacro[i] = tokens[indexParametro];
+//             }
+//           }
+//           linhasReprocessadas[indexLinhaReprocessada] = tokensMacro;
+//           ++indexLinhaReprocessada;
+//           ++linha;
+//         }
+//       } else {
+//         linhasReprocessadas[indexLinhaReprocessada] = tokens;
+//         ++indexLinhaReprocessada;
+//       }
+//       ++it2;
+//     }
+//   }
+
+//   return linhasReprocessadas;
+// }

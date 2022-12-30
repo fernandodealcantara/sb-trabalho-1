@@ -10,6 +10,8 @@
 
 using namespace std;
 
-void mntMdt(LinhaMap& linhas, MNTMap& mnt, LinhaMap& mdt);
+void gerarMntMdt(LinhaMap& linhas, MNTMap& mnt, LinhaMap& mdt);
+LinhaMap substituirMacros(LinhaMap& linhas, LinhaMap& mdt, MNTMap& mnt);
+LinhaMap processarMacros(LinhaMap& linhas);
 
 #endif  // MCR_H

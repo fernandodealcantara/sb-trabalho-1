@@ -80,8 +80,6 @@ void dumpMap(const LinhaMap& linhas) {
 
 void dumpMnt(const MNTMap& mnt) {
   for (auto it = mnt.begin(); it != mnt.end(); ++it) {
-    cout << it->first << " => N args: " << it->second.numArgs << " Linha:" << it->second.linha
-         << " Qtd de linhas: " << it->second.qtdLinhas << endl;
-    cout << endl;
+    cout << it->first << " => N args: " << it->second.numArgs << " Linha:" << it->second.linha << endl;
   }
 }
