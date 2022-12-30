@@ -9,11 +9,14 @@
 #include <string>
 #include <vector>
 
+#include "tipos.h"
+
 using namespace std;
 
 int verificarArgumentos(int argc, char* argv[]);
 string lerArquivo(string arquivo);
-void salvarArquivo(string arquivo, map<int, vector<string>> linhas);
-void dumpMap(const map<int, vector<string>>& linhas);
+void salvarArquivo(string arquivo, const LinhaMap& linhas);
+void dumpMap(const LinhaMap& linhas);
+void dumpMnt(const MNTMap& mnt);
 
 #endif  // UTILITARIOS_H

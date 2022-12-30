@@ -3,15 +3,16 @@
 
 #include <iostream>
 #include <map>
-#include <regex>
 #include <string>
 #include <vector>
 
+#include "tipos.h"
+
 using namespace std;
 
-map<int, vector<string>> processarEquates(const map<int, vector<string>>& linhas);
-map<int, vector<string>> processarIfs(const map<int, vector<string>>& linhas);
-map<int, vector<string>> processarLinhas(string conteudo);
+LinhaMap processarEquates(const LinhaMap& linhas);
+LinhaMap processarIfs(const LinhaMap& linhas);
+LinhaMap processarLinhas(string conteudo);
 vector<string> tokenize(const string& str);
 
 #endif  // PRE_H

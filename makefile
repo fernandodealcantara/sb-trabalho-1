@@ -1,7 +1,10 @@
+op=-o
+filename=sb/bin
+
 all: build run
 
 run:
-	./montador -o sb/bin
+	./montador $(op) $(filename)
 
 build:
-	g++ main.cpp pre.cpp utilitarios.cpp -o montador
+	g++ main.cpp pre.cpp mcr.cpp utilitarios.cpp tipos.cpp -o montador

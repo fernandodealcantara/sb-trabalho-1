@@ -4,43 +4,53 @@
 #include <stdexcept>
 #include <vector>
 
+#include "mcr.h"
 #include "pre.h"
+#include "tipos.h"
 #include "utilitarios.h"
 // O executável deve ser chamado de MONTADOR. E deve ter 3 modos de uso. Deve
 // ser possível chamar por linha de comando da seguinte forma: ./montador -<op>
 // <arquivo> O arquivo de entrada deve ser indicado SEM extensão e o arquivo de
 // saída deve MANTER o mesmo nome e mudar a extensão. Deve existir 3 formas de
-// operação: -p: A extensão da saída deve ser .PRE e somente deve se processar
-// EQU e IF -m: A extensão da saída deve ser .MCR e somente deve se processar
-// MACROS. A entrada vai ser a saída pré-processada -o: A extensão da saída deve
-// ser OBJ e deve seguir o formato indicado anteriormente. A entrada vai ser a
-// saída das Macros.
+// operação:
+// -p: A extensão da saída deve ser .PRE e somente deve se processar
+// EQU e IF
+// -m: A extensão da saída deve ser .MCR e somente deve se processar MACROS. A entrada vai ser a
+// saída pré-processada
+// -o: A extensão da saída deve ser OBJ e deve seguir o formato indicado anteriormente. A entrada
+// vai ser a saída das Macros.
 
 using namespace std;
 
 map<string, int> obterOpcodesNumericos();
 void analiseLexica(const int linha, const vector<string> tokens);
+LinhaMap processarMacros(LinhaMap& linhas);
 
 int main(int argc, char* argv[]) {
   auto instructions = obterOpcodesNumericos();
   verificarArgumentos(argc, argv);
   char op = argv[1][1];
   string nome_arquivo = argv[2];
-  string arquivo_entrada = nome_arquivo + ".asm";
-  string conteudo = lerArquivo(arquivo_entrada);
+  string conteudo = lerArquivo(nome_arquivo + ".asm");
 
-  map<int, vector<string>> linhas = processarLinhas(conteudo);
+  LinhaMap linhas = processarLinhas(conteudo);
 
   linhas = processarEquates(linhas);
   linhas = processarIfs(linhas);
-  salvarArquivo(nome_arquivo + ".pre", linhas);
-  
+
+  if (op == 'p') {
+    salvarArquivo(nome_arquivo + ".pre", linhas);
+    // return 0;
+  }
+
+  linhas = processarMacros(linhas);
+
   // analise lexica
   for (auto it = linhas.begin(); it != linhas.end(); ++it) {
     analiseLexica(it->first, it->second);
   }
 
-  dumpMap(linhas);
+  // dumpMap(linhas);
 
   return 0;
 }
@@ -69,24 +79,6 @@ map<string, int> obterOpcodesNumericos() {
 }
 
 void analiseLexica(const int linha, const vector<string> tokens) {
-  // using regex
-  // tokens validos são: ADD, SUB, MUL, DIV, JMP, JMPN, JMPP, JMPZ, COPY, LOAD,
-  // STORE, INPUT, OUTPUT, STOP, SPACE, CONST, SECTION TEXT, SECTION DATA,
-  // PUBLIC, EXTERN, EQU, IF, MACRO, ENDMACRO, BEGIN, END, ":" ",",
-  // X+2(caractere+digito) e qualquer palavra que não seja uma instrução ou
-  // diretiva
-
-  // regex para tokens validos
-  string uppercaseInsts = "ADD|SUB|MUL|DIV|JMP|JMPN|JMPP|JMPZ|COPY|LOAD|STORE|INPUT|OUTPUT|STOP";
-  string lowercaseInsts = "add|sub|mul|div|jmp|jmpn|jmpp|jmpz|copy|load|store|input|output|stop";
-  string uppercaseDirectives = "SPACE|CONST|SECTION|PUBLIC|EXTERN|EQU|IF|MACRO|ENDMACRO|BEGIN|END";
-  string lowercaseDirectives = "space|const|section|public|extern|equ|if|macro|endmacro|begin|end";
-  string uppercaseSections = "TEXT|DATA";
-  string lowercaseSections = "text|data";
-  string labels = "[A-Za-z][A-Za-z0-9_]*";
-  string values = "[0-9]+|[A-Za-z]\\+[0-9]";
-  string separators = ":|,";
-
   regex reg("((" + uppercaseInsts + ")|(" + lowercaseInsts + ")|(" + uppercaseDirectives + ")|(" +
             lowercaseDirectives + ")|(" + uppercaseSections + ")|(" + lowercaseSections + ")|(" +
             labels + ")|(" + separators + ")|(" + values + "))");
@@ -96,4 +88,115 @@ void analiseLexica(const int linha, const vector<string> tokens) {
       throw runtime_error("Erro léxico na linha " + to_string(linha) + ": " + token);
     }
   }
+}
+
+LinhaMap processarMacros(LinhaMap& linhas) {
+  LinhaMap linhasProcessadas, mdt;
+  MNTMap mnt;
+
+  mntMdt(linhas, mnt, mdt);
+
+  std::cout << "Linhas " << endl;
+  dumpMap(linhas);
+  std::cout << "---------- MNT ----------" << endl;
+  dumpMnt(mnt);
+  std::cout << "---------- MDT ----------" << endl;
+  dumpMap(mdt);
+
+  // substituir chamada de macro por chamada
+  int indexLinhaProcessada = 1;
+  int indexInicioInsercao;
+  int terminou_processamento = 0;
+  // pegar primeira linha da lista de linhas
+  auto it = linhas.begin();
+
+  while (!terminou_processamento) {
+    if (it != linhas.end()) {
+      indexInicioInsercao = indexLinhaProcessada;
+      vector<string> tokens = it->second;
+
+      // procurar macros
+      // substituir macros por chamadas
+      // Teste: Macro1 1, 2
+      if (tokens.size() >= 3 && regex_match(tokens[0], reLabel) && tokens[1] == ":" &&
+          regex_match(tokens[2], reLabel) && mnt.find(tokens[2]) != mnt.end()) {
+        cout << "Encontrou macro 3" << endl;
+        // encontrou macro
+        // substituir chamadas por conteudo da MDT
+        string nomeMacro = tokens[2];      // LABEL1: MACRO1 1, 2
+        int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
+
+        while (!regex_match(mdt[linha][0], reEndmacro)) {
+          vector<string> tokensMacro = mdt[linha];
+          // substituir parametros da macro
+          for (int i = 0; i < tokensMacro.size(); ++i) {
+            if (regex_match(tokensMacro[i], reMacroParam)) {
+              int numParam = stoi(tokensMacro[i].substr(1));
+              tokensMacro[i] = tokens[numParam + 2];
+            }
+          }
+          linhasProcessadas[indexLinhaProcessada] = tokensMacro;
+          ++indexLinhaProcessada;
+          ++linha;
+        }
+      } else if (tokens.size() >= 1 && regex_match(tokens[0], reLabel) &&
+                 mnt.find(tokens[0]) != mnt.end()) {
+        cout << "Encontrou macro 1" << endl;
+        // encontrou macro
+        // substituir chamadas por conteudo da MDT
+        string nomeMacro = tokens[0];      // MACRO1 ONE, DOIS
+        int linha = mnt[nomeMacro].linha;  // pega linha da macro na MDT
+
+        while (!regex_match(mdt[linha][0], reEndmacro)) {
+          vector<string> tokensMacro = mdt[linha];
+          // substituir parametros da macro
+          for (int i = 0; i < tokensMacro.size(); ++i) {
+            if (regex_match(tokensMacro[i], reMacroParam)) {
+              if(i<tokens.size()-1){
+                cout << "tokensMacro[i]: " << tokensMacro[i] << endl;
+                cout << "tokens[i+1]: " << tokens[i+1] << endl;
+                cout << "tokens[i]: " << tokens[i] << endl;
+                tokensMacro[i] = tokens[i+1];
+              }
+              // encontrar indice do parametro
+              int numParam;
+              for (numParam = 0; numParam < tokens.size(); ++numParam) {
+                if (tokens[numParam] == tokensMacro[i]) break; // one == &a
+              }
+              cout << "numParam: " << numParam << endl;
+              cout << "tokensMacro[i]: " << tokensMacro[i] << endl;
+              // cout << "tokens[numParam]: " << tokens[numParam] << endl;
+              // mostrar tokens
+              for (int i = 0; i < tokens.size(); ++i) {
+                cout << "tokens[" << i << "]: " << tokens[i] << endl;
+              }
+              tokensMacro[i] = tokens[numParam+1];
+            }
+          }
+          linhasProcessadas[indexLinhaProcessada] = tokensMacro;
+          ++indexLinhaProcessada;
+          ++linha;
+        }
+      } else {
+        cout << "Nao encontrou macro" << endl;
+        linhasProcessadas[indexLinhaProcessada] = tokens;
+        ++indexLinhaProcessada;
+      }
+      // ir para proxima linha
+      ++it;
+
+    } else {
+      terminou_processamento = 1;
+    }
+    // verificar se existe macro nas linhas processadas, se sim, repetir o processo para as linhas
+    // processadas
+  }
+
+  // substituir chamadas por conteudo da MDT
+
+  // substituir chamadas por conteudo da MDT
+
+  std::cout << "---------- Linhas Processadas ----------" << endl;
+  dumpMap(linhasProcessadas);
+  return linhasProcessadas;
 }

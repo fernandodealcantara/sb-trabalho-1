@@ -49,7 +49,7 @@ string lerArquivo(string arquivo) {
   return conteudo;
 }
 
-void salvarArquivo(string arquivo, map<int, vector<string>> linhas) {
+void salvarArquivo(string arquivo, const LinhaMap& linhas) {
   // Abra o arquivo em modo de escrita texto
   ofstream file(arquivo);
   if (!file.is_open()) {
@@ -68,12 +68,20 @@ void salvarArquivo(string arquivo, map<int, vector<string>> linhas) {
   file.close();
 }
 
-void dumpMap(const map<int, vector<string>>& linhas) {
+void dumpMap(const LinhaMap& linhas) {
   for (auto it = linhas.begin(); it != linhas.end(); ++it) {
     cout << it->first << " => ";
     for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
       cout << *it2 << " ";
     }
+    cout << endl;
+  }
+}
+
+void dumpMnt(const MNTMap& mnt) {
+  for (auto it = mnt.begin(); it != mnt.end(); ++it) {
+    cout << it->first << " => N args: " << it->second.numArgs << " Linha:" << it->second.linha
+         << " Qtd de linhas: " << it->second.qtdLinhas << endl;
     cout << endl;
   }
 }
