@@ -24,38 +24,56 @@
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
   auto instructions = obterOpcodesNumericos();
   verificarArgumentos(argc, argv);
   char op = argv[1][1];
   string nome_arquivo = argv[2];
   string conteudo = lerArquivo(nome_arquivo + ".asm");
-
+  vector<string> codigoObjeto;
   Codigo codigo = processarLinhas(conteudo);
 
   codigo = processarEquates(codigo);
   codigo = processarIfs(codigo);
 
-  if (op == 'p') {
+  if (op == 'p')
+  {
     salvarArquivo(nome_arquivo + ".pre", codigo);
     return 0;
   }
 
   codigo = processarMacros(codigo);
 
-  if (op == 'm') {
+  if (op == 'm')
+  {
     salvarArquivo(nome_arquivo + ".mcr", codigo);
     return 0;
   }
 
-  for (int i = 0; i < codigo.size(); i++) {
-    analiseLexica(i + 1, codigo[i]);
-    analiseSintatica(i + 1, codigo[i]);
+  for (int i = 0; i < codigo.size(); i++)
+  {
+    // analiseLexica(i + 1, codigo[i]);
+    // analiseSintatica(i + 1, codigo[i]);
   }
-
+  codigoObjeto = gerarCodigoObjeto(codigo);
+  if (op == 'o')
+  {
+    //Salvar arquivo
+      ofstream file(nome_arquivo + ".obj");
+      if (!file.is_open())
+      {
+        throw runtime_error("Error opening file");
+      }
+      for (int i = 0; i < codigoObjeto.size(); i++)
+      {
+        file << codigoObjeto[i] << " ";
+      }
+      file.close();
+    return 0;
+  }
   // vector<string> tokens = obterTokens(codigo);
   // dumpLinhaCodigo(tokens);
-  gerarCodigoObjeto(codigo);
 
   // dumpCodigo(codigo);
 

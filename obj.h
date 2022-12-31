@@ -10,7 +10,7 @@
 #include "utilitarios.h"
 using namespace std;
 
-void gerarCodigoObjeto(const Codigo &codigo);
+vector<string> gerarCodigoObjeto(const Codigo &codigo);
 map<string, int> obterOpcodesNumericos();
 
 vector<string> obterTokens(const Codigo &codigo);
