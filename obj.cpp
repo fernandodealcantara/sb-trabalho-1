@@ -1,6 +1,7 @@
 #include "obj.h"
 
-void gerarCodigoObjeto(const Codigo &codigo) {
+void gerarCodigoObjeto(const Codigo &codigo)
+{
   map<string, int> opcode = obterOpcodesNumericos();
   // vetor de dos objetos
   vector<string> objetos;
@@ -11,49 +12,71 @@ void gerarCodigoObjeto(const Codigo &codigo) {
   // inicializar o vetor de endereços com 0
   enderecos.push_back(0);
   // imprimir o vetor de endereços
-  for (auto linha = codigo.begin(); linha != codigo.end(); ++linha) {
-    if (linha->size() >= 2 && linha->at(1) == ":") {
-      if (linha->size() >= 3 && regex_match(linha->at(2), reConst)) {
+  for (auto linha = codigo.begin(); linha != codigo.end(); ++linha)
+  {
+    if (linha->size() >= 2 && linha->at(1) == ":")
+    {
+      if (linha->size() >= 3 && regex_match(linha->at(2), reConst))
+      {
         enderecos.push_back(enderecos.back() + 1);
-      } else if (linha->size() >= 3 && regex_match(linha->at(2), reSpace)) {
-        if (linha->size() == 4) {
-          enderecos.push_back(enderecos.back() + stoi(linha->at(3)));  // TESTE : SPACE 3
-        } else {
+        tabela_simbolos[linha->at(0)] = enderecos[enderecos.size() - 2];
+      }
+      else if (linha->size() >= 3 && regex_match(linha->at(2), reSpace))
+      {
+        if (linha->size() == 4)
+        {
+          enderecos.push_back(enderecos.back() + stoi(linha->at(3))); // TESTE : SPACE 3
+          tabela_simbolos[linha->at(0)] = enderecos[enderecos.size() - 2];
+        }
+        else
+        {
+          enderecos.push_back(enderecos.back() + 1);
+          tabela_simbolos[linha->at(0)] = enderecos[enderecos.size() - 2];
+        }
+      }
+      else
+      {
+        enderecos.push_back(enderecos.back() + 2);
+        tabela_simbolos[linha->at(0)] = enderecos[enderecos.size() - 2];
+      }
+    }
+    else
+    {
+      if (opcode.find(linha->at(0)) != opcode.end())
+      {
+        if (regex_match(linha->at(0), reCopy))
+        {
+          enderecos.push_back(enderecos.back() + 3);
+        }
+        else if (regex_match(linha->at(0), reStop))
+        {
           enderecos.push_back(enderecos.back() + 1);
         }
-      } else {
-        enderecos.push_back(enderecos.back() + 2);
-      }
-    } else {
-      if (opcode.find(linha->at(0)) != opcode.end()) {
-        if (regex_match(linha->at(0), reCopy)) {
-          enderecos.push_back(enderecos.back() + 3);
-        } else if (regex_match(linha->at(0), reStop)) {
-          enderecos.push_back(enderecos.back() + 1);
-        } else {
+        else
+        {
           enderecos.push_back(enderecos.back() + 2);
         }
       }
     }
   }
   // imprimir o vetor de endereços
-  for (auto it = enderecos.begin(); it != enderecos.end(); ++it) {
+  for (auto it = enderecos.begin(); it != enderecos.end(); ++it)
+  {
     cout << *it << " ";
   }
   cout << endl;
   // for (auto linha = codigo.begin(); linha != codigo.end(); ++linha) {
   //   // somar 2 ao endereço de memoria anterior e guarda-la no vetor de endereços
-  //   if (linha->at(1) == ":") {
+  //   if (linha->size() >= 2 && linha->at(1) == ":") {
   //     // adicionar o token anterior na tabela de simbolos e seu endereço
-  //     tabela_simbolos[linha->at(0)] = enderecos[enderecos.size() - 2];
+  //     tabela_simbolos[linha->at(0)] = enderecos[enderecos.size() - 1];
   //   }
   // }
-  // // imprimir a tabela de simbolos
-  // for (auto it = tabela_simbolos.begin(); it != tabela_simbolos.end(); ++it) {
-  //   cout << it->first << " " << it->second << endl;
-  // }
-
-
+  // imprimir a tabela de simbolos
+  for (auto it = tabela_simbolos.begin(); it != tabela_simbolos.end(); ++it)
+  {
+    cout << it->first << " " << it->second << endl;
+  }
 }
 /*
 void gerarCodigoObjeto(const LinhaMap &linhas) {
@@ -148,7 +171,8 @@ então
   cout << endl;
 }
 */
-map<string, int> obterOpcodesNumericos() {
+map<string, int> obterOpcodesNumericos()
+{
   // Declare a map to store the instructions
   map<string, int> opcode;
 

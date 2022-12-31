@@ -55,9 +55,9 @@ int main(int argc, char* argv[]) {
 
   // vector<string> tokens = obterTokens(codigo);
   // dumpLinhaCodigo(tokens);
-  // gerarCodigoObjeto(codigo);
+  gerarCodigoObjeto(codigo);
 
-  dumpCodigo(codigo);
+  // dumpCodigo(codigo);
 
   return 0;
 }
