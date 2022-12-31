@@ -22,6 +22,8 @@ typedef struct {
 
 typedef map<string, Macro> MNTMap;
 
+extern string uppercaseInsts1Arg;
+extern string lowercaseInsts1Arg;
 extern string uppercaseInsts;
 extern string lowercaseInsts;
 extern string uppercaseDirectives;

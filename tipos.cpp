@@ -8,6 +8,8 @@
 // diretiva
 
 // regex para tokens validos
+string uppercaseInsts1Arg = "ADD|SUB|MUL|MULT|DIV|JMP|JMPN|JMPP|JMPZ|LOAD|STORE|INPUT|OUTPUT";
+string lowercaseInsts1Arg = "add|sub|mul|mult|div|jmp|jmpn|jmpp|jmpz|load|store|input|output";
 string uppercaseInsts = "ADD|SUB|MUL|MULT|DIV|JMP|JMPN|JMPP|JMPZ|COPY|LOAD|STORE|INPUT|OUTPUT|STOP";
 string lowercaseInsts = "add|sub|mul|mult|div|jmp|jmpn|jmpp|jmpz|copy|load|store|input|output|stop";
 string uppercaseDirectives = "SPACE|CONST|SECTION|PUBLIC|EXTERN|EQU|IF|MACRO|ENDMACRO|BEGIN|END";
