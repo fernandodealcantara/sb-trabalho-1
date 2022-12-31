@@ -10,15 +10,13 @@ Codigo processarLinhas(string conteudo) {
     // se não for vazio, adicionar ao codigo
     LinhaCodigo linha_codigo = tokenize(linha);
     // quebrar label e instrucaao em linhas diferentes
-    if (linha_codigo.size() > 2 && !regex_match(linha_codigo[2], reSpace) &&
-        !regex_match(linha_codigo[2], reConst)) {
-      if (linha_codigo[1] == ":") {
-        LinhaCodigo linha_label;
-        linha_label.push_back(linha_codigo[0]);
-        linha_label.push_back(linha_codigo[1]);
-        codigo.push_back(linha_label);
-        linha_codigo.erase(linha_codigo.begin(), linha_codigo.begin() + 2);
-      }
+    while (linha_codigo.size() > 2 && linha_codigo[1] == ":" &&
+           !regex_match(linha_codigo[2], reSpace) && !regex_match(linha_codigo[2], reConst)) {
+      LinhaCodigo linha_label;
+      linha_label.push_back(linha_codigo[0]);
+      linha_label.push_back(linha_codigo[1]);
+      codigo.push_back(linha_label);
+      linha_codigo.erase(linha_codigo.begin(), linha_codigo.begin() + 2);
     }
 
     if (!linha_codigo.empty()) {
