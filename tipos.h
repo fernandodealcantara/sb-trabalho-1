@@ -22,6 +22,7 @@ typedef struct {
 
 typedef map<string, Macro> MNTMap;
 
+extern string valuesToSintaticAnalysis;
 extern string uppercaseInsts1Arg;
 extern string lowercaseInsts1Arg;
 extern string uppercaseInsts;
@@ -33,6 +34,11 @@ extern string lowercaseSections;
 extern string labels;
 extern string values;
 extern string separators;
+
+extern regex reBeforeValue;
+extern regex reValuesNoLabel;
+extern regex reInst1Args;
+extern regex reValues;
 
 extern regex reAdd;
 extern regex reSub;

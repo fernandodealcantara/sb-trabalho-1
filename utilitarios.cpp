@@ -96,7 +96,7 @@ void dumpCodigo(const Codigo& codigo) {
 
 void dumpLinhaCodigo(const LinhaCodigo& linha) {
   for (auto it = linha.begin(); it != linha.end(); ++it) {
-    cout << *it << "  ";
+    cout << *it << " ";
   }
   cout << endl;
 }

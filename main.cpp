@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include "analises.h"
 #include "mcr.h"
 #include "obj.h"
 #include "pre.h"
@@ -23,9 +24,6 @@
 
 using namespace std;
 
-void analiseLexica(const int linha, const vector<string> tokens);
-void analiseSintatica(const int linha, const vector<string> tokens, const int posicao_secao_dados);
-
 int main(int argc, char* argv[]) {
   auto instructions = obterOpcodesNumericos();
   verificarArgumentos(argc, argv);
@@ -40,130 +38,26 @@ int main(int argc, char* argv[]) {
 
   if (op == 'p') {
     salvarArquivo(nome_arquivo + ".pre", codigo);
-    // return 0;
+    return 0;
   }
 
   codigo = processarMacros(codigo);
-  gerarCodigoObjeto(codigo);
+
   if (op == 'm') {
     salvarArquivo(nome_arquivo + ".mcr", codigo);
-    // return 0;
-  }
-
-  // pegar posição da seção de dados
-  int posicao_secao_dados = 0;
-  for (int i = 0; i < codigo.size(); i++) {
-    if (codigo[i].size() >= 2 && regex_match(codigo[i][0], reSection) &&
-        regex_match(codigo[i][1], reData)) {
-      posicao_secao_dados = i;
-      break;
-    }
+    return 0;
   }
 
   for (int i = 0; i < codigo.size(); i++) {
     analiseLexica(i + 1, codigo[i]);
-    analiseSintatica(i + 1, codigo[i], posicao_secao_dados);
+    analiseSintatica(i + 1, codigo[i]);
   }
+
   // vector<string> tokens = obterTokens(codigo);
-  // analiseLexica(0, codigo);
   // dumpLinhaCodigo(tokens);
-
   // gerarCodigoObjeto(codigo);
-
-  // analise lexica
-  // for (auto it = linhas.begin(); it != linhas.end(); ++it) {
-  //   analiseLexica(it->first, it->second);
-  // }
 
   dumpCodigo(codigo);
 
   return 0;
-}
-
-void analiseLexica(const int linha, const vector<string> tokens) {
-  regex reg("((" + uppercaseInsts + ")|(" + lowercaseInsts + ")|(" + uppercaseDirectives + ")|(" +
-            lowercaseDirectives + ")|(" + uppercaseSections + ")|(" + lowercaseSections + ")|(" +
-            labels + ")|(" + separators + ")|(" + values + "))");
-
-  for (const string& token : tokens) {
-    if (!regex_match(token, reg)) {
-      throw runtime_error("Erro léxico na linha " + to_string(linha) + ": " + token);
-    }
-  }
-}
-
-void analiseSintatica(const int linha, const vector<string> tokens, const int posicao_secao_dados) {
-  if (tokens.size() == 0) {
-    return;
-  }
-
-  regex reInst1Args(uppercaseInsts1Arg + "|" + lowercaseInsts1Arg);
-  regex reValues(values + "|" + labels);
-
-  for (int i = 0; i < tokens.size(); i++) {
-    if (regex_match(tokens[i], reSection)) {  // erro sintatico seção
-      if (i + 1 >= tokens.size()) {
-        throw runtime_error("Erro sintático na linha (1) " + to_string(linha) + ": " + tokens[i]);
-      }
-      if (!regex_match(tokens[i + 1], reText) && !regex_match(tokens[i + 1], reData)) {
-        throw runtime_error("Erro sintático na linha (2) " + to_string(linha) + ": " +
-                            tokens[i + 1]);
-      }
-    } else if (regex_match(tokens[i], reInst1Args)) {  // erro sintatico instrucao 1 arg
-      if (i + 1 >= tokens.size()) {
-        throw runtime_error("Erro sintático na linha (3) " + to_string(linha) + ": " + tokens[i]);
-      }
-      if (!regex_match(tokens[i + 1], reValues)) {
-        throw runtime_error("Erro sintático na linha (4) " + to_string(linha) + ": " +
-                            tokens[i + 1]);
-      }
-    } else if (regex_match(tokens[i], reCopy)) {  // erro sintatico copy (2 args)
-      if (i + 3 >= tokens.size()) {
-        throw runtime_error("Erro sintático na linha (5) " + to_string(linha) + ": " + tokens[i]);
-      }
-      if (!regex_match(tokens[i + 1], reValues)) {
-        throw runtime_error("Erro sintático na linha (6) " + to_string(linha) + ": " +
-                            tokens[i + 1]);
-      }
-      if (tokens[i + 2] != ",") {
-        throw runtime_error("Erro sintático na linha (7) " + to_string(linha) + ": " +
-                            tokens[i + 2]);
-      }
-      if (!regex_match(tokens[i + 3], reValues)) {
-        throw runtime_error("Erro sintático na linha (8) " + to_string(linha) + ": " +
-                            tokens[i + 3]);
-      }
-    } else if (regex_match(tokens[i], reStop)) {  // erro sintatico stop (0 args)
-      if (i + 1 < tokens.size()) {
-        throw runtime_error("Erro sintático na linha (9) " + to_string(linha) + ": " +
-                            tokens[i + 1]);
-      }
-    } else if (linha > posicao_secao_dados && regex_match(tokens[i], reLabel)) {
-      if (tokens.size() > i + 3 && tokens[i + 1] == ":") {
-        if (!regex_match(tokens[i + 2], reSpace) && !regex_match(tokens[i + 2], reConst)) {
-          throw runtime_error("Erro sintático na linha (10) " + to_string(linha) + ": " +
-                              tokens[i + 2]);
-        }
-        if (!regex_match(tokens[i + 3], reValues)) {
-          throw runtime_error("Erro sintático na linha (11) " + to_string(linha) + ": " +
-                              tokens[i + 3]);
-        }
-      }
-    } else if (linha <= posicao_secao_dados && regex_match(tokens[i], reLabel)) {
-      // if (tokens.size() > i + 1) {
-      //   if (tokens[i + 1] == ",") {
-      //     if (tokens.size() > i + 2 && !regex_match(tokens[i + 2], reValues)) {
-      //       throw runtime_error("Erro sintático na linha (12) " + to_string(linha) + ": " +
-      //                           tokens[i + 1]);
-      //     }
-      //   } else if (tokens[i + 1] != ":") {
-      //     throw runtime_error("Erro sintático na linha (13) " + to_string(linha) + ": " +
-      //                         tokens[i + 1]);
-      //   }
-      // } else if (tokens.size() == i + 1) {
-      //   throw runtime_error("Erro sintático na linha (14) " + to_string(linha) + ": " +
-      //                       tokens[i + 1]);
-      // }
-    }
-  }
 }

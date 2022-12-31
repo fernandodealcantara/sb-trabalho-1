@@ -8,6 +8,7 @@
 // diretiva
 
 // regex para tokens validos
+string valuesToSintaticAnalysis = "[0-9]+|[A-Za-z]+\\+[0-9]+|[A-Za-z](_?[A-Za-z0-9])*";
 string uppercaseInsts1Arg = "ADD|SUB|MUL|MULT|DIV|JMP|JMPN|JMPP|JMPZ|LOAD|STORE|INPUT|OUTPUT";
 string lowercaseInsts1Arg = "add|sub|mul|mult|div|jmp|jmpn|jmpp|jmpz|load|store|input|output";
 string uppercaseInsts = "ADD|SUB|MUL|MULT|DIV|JMP|JMPN|JMPP|JMPZ|COPY|LOAD|STORE|INPUT|OUTPUT|STOP";
@@ -16,9 +17,16 @@ string uppercaseDirectives = "SPACE|CONST|SECTION|PUBLIC|EXTERN|EQU|IF|MACRO|END
 string lowercaseDirectives = "space|const|section|public|extern|equ|if|macro|endmacro|begin|end";
 string uppercaseSections = "TEXT|DATA";
 string lowercaseSections = "text|data";
-string labels = "[A-Za-z][A-Za-z0-9_]*[^_]?";
-string values = "[0-9]+|[A-Za-z]+\\+[0-9]+|&[A-Za-z][A-Za-z0-9_]*[^_]?";
+string labels = "[A-Za-z](_?[A-Za-z0-9])*";
+string values = "[0-9]+|[A-Za-z]+\\+[0-9]+|&[A-Za-z](_?[A-Za-z0-9])*";
 string separators = ":|,";
+
+regex reBeforeValue(uppercaseInsts1Arg + "|" + lowercaseInsts1Arg +
+                    "|COPY|copy|SPACE|space|CONST|const|,");
+
+regex reValuesNoLabel("[0-9]+|[A-Za-z]+\\+[0-9]+");
+regex reInst1Args(uppercaseInsts1Arg + "|" + lowercaseInsts1Arg);
+regex reValues(valuesToSintaticAnalysis);
 
 // instrucoes
 regex reAdd("ADD|add");
@@ -51,10 +59,10 @@ regex reEnd("END|end");
 regex reText("TEXT|text");
 regex reData("DATA|data");
 // tokens validos
-regex reLabel("[A-Za-z][A-Za-z0-9_]*[^_]?");
+regex reLabel("[A-Za-z](_?[A-Za-z0-9])*");
 regex reValue("[0-9]+");
 regex reSymbolPlusValue("[A-Za-z]+\\+[0-9]+");
 regex reSeparator(":|,");
 regex reComment(";.*");
-regex reMacroParam("&[A-Za-z][A-Za-z0-9_]*[^_]?");
+regex reMacroParam("&[A-Za-z](_?[A-Za-z0-9])*");
 regex reParametro("#[0-9]+");
