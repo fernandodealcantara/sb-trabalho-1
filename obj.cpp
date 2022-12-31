@@ -36,8 +36,7 @@ void gerarCodigoObjeto(const Codigo &codigo)
       }
       else
       {
-        enderecos.push_back(enderecos.back() + 2);
-        tabela_simbolos[linha->at(0)] = enderecos[enderecos.size() - 2];
+        tabela_simbolos[linha->at(0)] = enderecos.back();
       }
     }
     else
@@ -65,17 +64,78 @@ void gerarCodigoObjeto(const Codigo &codigo)
     cout << *it << " ";
   }
   cout << endl;
-  // for (auto linha = codigo.begin(); linha != codigo.end(); ++linha) {
-  //   // somar 2 ao endereço de memoria anterior e guarda-la no vetor de endereços
-  //   if (linha->size() >= 2 && linha->at(1) == ":") {
-  //     // adicionar o token anterior na tabela de simbolos e seu endereço
-  //     tabela_simbolos[linha->at(0)] = enderecos[enderecos.size() - 1];
-  //   }
-  // }
   // imprimir a tabela de simbolos
   for (auto it = tabela_simbolos.begin(); it != tabela_simbolos.end(); ++it)
   {
     cout << it->first << " " << it->second << endl;
+  }
+
+  // gerar o codigo objeto
+  // percorrer o map
+  for (auto linha = codigo.begin(); linha != codigo.end(); ++linha)
+  {
+    // percorrer o vetor de tokens
+    // verificar se o token é um opcode
+    if (linha->size() > 2 && linha->at(1) == ":")
+    {
+      if (regex_match(linha->at(2), reConst))
+      {
+
+        objetos.push_back(linha->at(3));
+      }
+      else if (regex_match(linha->at(2), reSpace))
+      {
+
+        objetos.push_back("0");
+      }
+      continue;
+    }
+
+    if (opcode.find(linha->at(0)) != opcode.end())
+    {
+      // se for, adicionar o opcode ao vetor de objetos
+      objetos.push_back(to_string(opcode[linha->at(0)]));
+      // verificar se o proximo token está na tabela de simbolos
+      // Stop não tem operandos
+      if (regex_match(linha->at(0), reStop))
+      {
+        continue;
+      }
+      // SPACE não tem operandos e não é um opcode colocar 0
+      // Const tem 1 operando e não é um opcode colocar operando
+      // Copy tem 2 operandos
+      if (regex_match(linha->at(0), reCopy))
+      {
+        // verificar se o proximo token está na tabela de simbolos
+        if (tabela_simbolos.find(linha->at(1)) != tabela_simbolos.end())
+        {
+          // se estiver, adicionar o endereço de memoria do token ao vetor de objetos
+          objetos.push_back(to_string(tabela_simbolos[linha->at(1)]));
+        }
+        // verificar se o proximo token está na tabela de simbolos
+        if (tabela_simbolos.find(linha->at(3)) != tabela_simbolos.end())
+        {
+          // se estiver, adicionar o endereço de memoria do token ao vetor de objetos
+          objetos.push_back(to_string(tabela_simbolos[linha->at(3)]));
+        }
+        continue;
+      }
+      if (tabela_simbolos.find(linha->at(1)) != tabela_simbolos.end())
+      {
+        // se estiver, adicionar o endereço de memoria do token ao vetor de objetos
+        objetos.push_back(to_string(tabela_simbolos[linha->at(1)]));
+      }
+      else
+      {
+        // se não estiver, adicionar o token ao vetor de objetos
+        objetos.push_back(linha->at(1));
+      }
+    }
+  }
+  // imprimir o vetor de objetos
+  for (auto it = objetos.begin(); it != objetos.end(); ++it)
+  {
+    cout << *it << endl;
   }
 }
 /*
@@ -179,7 +239,7 @@ map<string, int> obterOpcodesNumericos()
   // Populate the map with some instructions
   opcode["ADD"] = 1;
   opcode["SUB"] = 2;
-  opcode["MUL"] = 3;
+  opcode["MULT"] = 3;
   opcode["DIV"] = 4;
   opcode["JMP"] = 5;
   opcode["JMPN"] = 6;
