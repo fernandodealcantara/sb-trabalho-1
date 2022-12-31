@@ -20,8 +20,6 @@ void analiseSintatica(const int linha, const vector<string> tokens) {
     return;
   }
 
-  cout << "Linha " << linha << ": " << tokens[0] << endl;
-
   try {
     for (int i = 0; i < tokens.size(); i++) {
       if (regex_match(tokens[i], reSection)) {  // erro sintatico seção
@@ -79,6 +77,11 @@ void analiseSintatica(const int linha, const vector<string> tokens) {
             throw runtime_error("(ES:10) Erro sintático na linha " + to_string(linha) + ": " +
                                 tokens[i + 1]);
           }
+
+          if (i + 2 < tokens.size()) {  // space com argumento a mais
+            throw runtime_error("(ES:10.1) Erro sintático na linha " + to_string(linha) + ": " +
+                                tokens[i + 2]);
+          }
         }
 
       } else if (regex_match(tokens[i], reConst)) {     // erro sintatico const (1 arg)
@@ -86,6 +89,11 @@ void analiseSintatica(const int linha, const vector<string> tokens) {
           if (!regex_match(tokens[i + 1], reValues)) {  // const com argumento inválido
             throw runtime_error("(ES:11) Erro sintático na linha " + to_string(linha) + ": " +
                                 tokens[i + 1]);
+          }
+
+          if (i + 2 < tokens.size()) {  // const com argumento a mais
+            throw runtime_error("(ES:11.1) Erro sintático na linha " + to_string(linha) + ": " +
+                                tokens[i + 2]);
           }
         }
       } else if (regex_match(tokens[i], reText) ||
