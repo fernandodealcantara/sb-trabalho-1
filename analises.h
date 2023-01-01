@@ -13,5 +13,6 @@ using namespace std;
 
 void analiseLexica(const int linha, const vector<string> tokens);
 void analiseSintatica(const int linha, const vector<string> tokens);
+void analisarCodigo(const Codigo& codigo);
 
 #endif  // ANALISES_H

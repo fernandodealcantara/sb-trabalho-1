@@ -1,0 +1,12 @@
+; Programa que calcula o valor de 5 + 7
+; Deve gerar obj -> 10 9 1 10 11 11 13 11 14 5 7 0
+SECTION TEXT
+LOAD V1
+ADD V2
+STORE RESULT
+OUTPUT RESULT
+STOP
+SECTION DATA
+V1: CONST 0x5
+V2: CONST 7
+RESULT: SPACE

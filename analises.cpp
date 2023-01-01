@@ -2,6 +2,13 @@
 
 using namespace std;
 
+void analisarCodigo(const Codigo& codigo) {
+  for (int i = 0; i < codigo.size(); i++) {
+    analiseLexica(i + 1, codigo[i]);
+    analiseSintatica(i + 1, codigo[i]);
+  }
+}
+
 void analiseLexica(const int linha, const vector<string> tokens) {
   regex reg(uppercaseInsts + "|" + lowercaseInsts + "|" + uppercaseDirectives + "|" +
             lowercaseDirectives + "|" + uppercaseSections + "|" + lowercaseSections + "|" + labels +
@@ -76,7 +83,7 @@ void analiseSintatica(const int linha, const vector<string> tokens) {
           throw runtime_error("(ES:10.2) Erro sintático na linha " + to_string(linha) + ": " +
                               tokens[i]);
         } else if (i + 1 < tokens.size()) {             // space com argumento
-          if (!regex_match(tokens[i + 1], reValues)) {  // space com argumento inválido
+          if (!regex_match(tokens[i + 1], reValue)) {  // space com argumento inválido
             throw runtime_error("(ES:10) Erro sintático na linha " + to_string(linha) + ": " +
                                 tokens[i + 1]);
           }
@@ -92,7 +99,7 @@ void analiseSintatica(const int linha, const vector<string> tokens) {
           throw runtime_error("(ES:11.2) Erro sintático na linha " + to_string(linha) + ": " +
                               tokens[i]);
         } else if (i + 1 < tokens.size()) {             // const com argumento
-          if (!regex_match(tokens[i + 1], reValues)) {  // const com argumento inválido
+          if (!regex_match(tokens[i + 1], reValue)) {  // const com argumento inválido
             throw runtime_error("(ES:11) Erro sintático na linha " + to_string(linha) + ": " +
                                 tokens[i + 1]);
           }

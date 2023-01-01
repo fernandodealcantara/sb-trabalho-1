@@ -65,10 +65,7 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  for (int i = 0; i < codigo.size(); i++) {
-    analiseLexica(i + 1, codigo[i]);
-    analiseSintatica(i + 1, codigo[i]);
-  }
+  analisarCodigo(codigo);
 
   vector<string> codigoObjeto = processarObjeto(codigo);
 #ifdef DEBUG
