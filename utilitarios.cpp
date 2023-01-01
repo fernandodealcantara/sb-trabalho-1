@@ -58,11 +58,21 @@ void salvarArquivo(string arquivo, const Codigo& codigo) {
 
   // Escreva o conteúdo do código no arquivo
   for (auto it = codigo.begin(); it != codigo.end(); ++it) {
+    string linha = "";
     for (auto it2 = it->begin(); it2 != it->end(); ++it2) {
-      file << *it2 << " ";
+      if (regex_match(*it2, reDeveTerEspacoNaDireita))
+        linha += *it2 + " ";
+      else
+        linha += *it2;
     }
-    file << endl;
+    // remover o último espaço se houver
+    if (linha.size() > 0 && linha[linha.size() - 1] == ' ') {
+      linha = linha.substr(0, linha.size() - 1);
+    }
+    if (linha.size() > 0) file << linha << endl;
   }
+
+  file << endl;
 
   // Feche o arquivo
   file.close();
@@ -86,7 +96,9 @@ void dumpMnt(const MNTMap& mnt) {
 }
 
 void dumpCodigo(const Codigo& codigo) {
+  int linha = 1;
   for (auto it = codigo.begin(); it != codigo.end(); ++it) {
+    cout << linha++ << ": ";
     for (auto it2 = it->begin(); it2 != it->end(); ++it2) {
       cout << *it2 << " ";
     }
@@ -99,4 +111,10 @@ void dumpLinhaCodigo(const LinhaCodigo& linha) {
     cout << *it << " ";
   }
   cout << endl;
+}
+
+void dumpTabSimbolos(const TabSimbolos& tabSimbolos) {
+  for (auto it = tabSimbolos.begin(); it != tabSimbolos.end(); ++it) {
+    cout << it->first << " => " << it->second << endl;
+  }
 }

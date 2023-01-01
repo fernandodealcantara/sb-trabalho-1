@@ -25,16 +25,29 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  auto instructions = obterOpcodesNumericos();
   verificarArgumentos(argc, argv);
   char op = argv[1][1];
+  vector<string> codigoObjeto;
   string nome_arquivo = argv[2];
   string conteudo = lerArquivo(nome_arquivo + ".asm");
 
   Codigo codigo = processarLinhas(conteudo);
 
+  #ifdef DEBUG
+  cout << "\nCodigo original:" << endl;
+  dumpCodigo(codigo);
+  #endif
+
   codigo = processarEquates(codigo);
+  #ifdef DEBUG
+  cout << "\nCodigo depois de processar equates:" << endl;
+  dumpCodigo(codigo);
+  #endif
   codigo = processarIfs(codigo);
+  #ifdef DEBUG
+  cout << "\nCodigo depois de processar ifs:" << endl;
+  dumpCodigo(codigo);
+  #endif
 
   if (op == 'p') {
     salvarArquivo(nome_arquivo + ".pre", codigo);
@@ -42,6 +55,10 @@ int main(int argc, char* argv[]) {
   }
 
   codigo = processarMacros(codigo);
+  #ifdef DEBUG
+  cout << "\nCodigo depois de processar macros:" << endl;
+  dumpCodigo(codigo);
+  #endif
 
   if (op == 'm') {
     salvarArquivo(nome_arquivo + ".mcr", codigo);
@@ -52,12 +69,28 @@ int main(int argc, char* argv[]) {
     analiseLexica(i + 1, codigo[i]);
     analiseSintatica(i + 1, codigo[i]);
   }
-
+  // codigoObjeto = gerarCodigoObjeto(codigo);
+  codigoObjeto = processarObjeto(codigo);
+  #ifdef DEBUG
+  cout << "\nCodigo objeto:" << endl;
+  dumpLinhaCodigo(codigoObjeto);
+  #endif
+  if (op == 'o') {
+    // Salvar arquivo
+    ofstream file(nome_arquivo + ".obj");
+    if (!file.is_open()) {
+      throw runtime_error("Error opening file");
+    }
+    for (int i = 0; i < codigoObjeto.size(); i++) {
+      file << codigoObjeto[i] << " ";
+    }
+    file.close();
+    return 0;
+  }
   // vector<string> tokens = obterTokens(codigo);
   // dumpLinhaCodigo(tokens);
   // gerarCodigoObjeto(codigo);
 
-  dumpCodigo(codigo);
 
   return 0;
 }

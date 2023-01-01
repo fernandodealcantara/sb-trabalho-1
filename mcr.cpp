@@ -42,6 +42,13 @@ Codigo processarMacros(const Codigo& codigo) {
     }
   }
 
+  #ifdef DEBUG
+  cout << "\nMDT:" << endl;
+  dumpCodigo(mdt);
+  cout << "\nMNT:" << endl;
+  dumpMnt(mnt);
+  #endif
+
   // substituir chamadas de macros
   return subtituirMacros(codigoSemMacros, mnt, mdt);
 }

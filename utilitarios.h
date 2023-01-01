@@ -20,5 +20,6 @@ void dumpMap(const LinhaMap& linhas);
 void dumpMnt(const MNTMap& mnt);
 void dumpCodigo(const Codigo& codigo);
 void dumpLinhaCodigo(const LinhaCodigo& linha);
+void dumpTabSimbolos(const TabSimbolos& tabSimbolos);
 
 #endif  // UTILITARIOS_H

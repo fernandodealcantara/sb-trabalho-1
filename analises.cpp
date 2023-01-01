@@ -71,8 +71,11 @@ void analiseSintatica(const int linha, const vector<string> tokens) {
           throw runtime_error("(ES:9) Erro sintático na linha " + to_string(linha) + ": " +
                               tokens[i + 1]);
         }
-      } else if (regex_match(tokens[i], reSpace)) {     // erro sintatico space (1 arg)
-        if (i + 1 < tokens.size()) {                    // space com argumento
+      } else if (regex_match(tokens[i], reSpace)) {  // erro sintatico space (1 arg)
+        if (i == 0) {                                // space sem label
+          throw runtime_error("(ES:10.2) Erro sintático na linha " + to_string(linha) + ": " +
+                              tokens[i]);
+        } else if (i + 1 < tokens.size()) {             // space com argumento
           if (!regex_match(tokens[i + 1], reValues)) {  // space com argumento inválido
             throw runtime_error("(ES:10) Erro sintático na linha " + to_string(linha) + ": " +
                                 tokens[i + 1]);
@@ -84,8 +87,11 @@ void analiseSintatica(const int linha, const vector<string> tokens) {
           }
         }
 
-      } else if (regex_match(tokens[i], reConst)) {     // erro sintatico const (1 arg)
-        if (i + 1 < tokens.size()) {                    // const com argumento
+      } else if (regex_match(tokens[i], reConst)) {  // erro sintatico const (1 arg)
+        if (i == 0) {                                // const sem label
+          throw runtime_error("(ES:11.2) Erro sintático na linha " + to_string(linha) + ": " +
+                              tokens[i]);
+        } else if (i + 1 < tokens.size()) {             // const com argumento
           if (!regex_match(tokens[i + 1], reValues)) {  // const com argumento inválido
             throw runtime_error("(ES:11) Erro sintático na linha " + to_string(linha) + ": " +
                                 tokens[i + 1]);
@@ -109,7 +115,7 @@ void analiseSintatica(const int linha, const vector<string> tokens) {
         }
 
       } else if (tokens[i] == ":") {  // erro sintatico dois pontos
-        if (i - 1 < 0) {              // dois pontos sem label
+        if (i != 1) {                 // dois pontos sem label ou com label a mais
           throw runtime_error("(ES:14) Erro sintático na linha " + to_string(linha) + ": " +
                               tokens[i]);
         }

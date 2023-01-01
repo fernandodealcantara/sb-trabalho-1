@@ -14,6 +14,8 @@ typedef vector<string> LinhaCodigo;
 
 typedef vector<LinhaCodigo> Codigo;
 
+typedef map<string, int> TabSimbolos;
+
 // Macro Name Table
 typedef struct {
   int numArgs;
@@ -39,6 +41,9 @@ extern regex reBeforeValue;
 extern regex reValuesNoLabel;
 extern regex reInst1Args;
 extern regex reValues;
+extern regex secDataValues;
+
+extern regex reDeveTerEspacoNaDireita;
 
 extern regex reAdd;
 extern regex reSub;
