@@ -57,19 +57,25 @@ void salvarArquivo(string arquivo, const Codigo& codigo) {
   }
 
   // Escreva o conteúdo do código no arquivo
-  for (auto it = codigo.begin(); it != codigo.end(); ++it) {
-    string linha = "";
-    for (auto it2 = it->begin(); it2 != it->end(); ++it2) {
-      if (regex_match(*it2, reDeveTerEspacoNaDireita))
-        linha += *it2 + " ";
-      else
-        linha += *it2;
+  for (int i = 0; i < codigo.size(); i++) {
+    LinhaCodigo linha;
+    for (auto token : codigo[i]) {
+      if (linha.empty()) { // Primeiro token
+        linha.push_back(token);
+      } else if (token == ":" || token == ",") { // Token especial
+        linha.push_back(token);
+      } else { // Outros tokens
+        if (linha.back() == ",") { // Token anterior é uma vírgula
+          linha.push_back(token);
+        } else { // Token anterior não é uma vírgula
+          linha.push_back(" " + token);
+        }
+      }
     }
-    // remover o último espaço se houver
-    if (linha.size() > 0 && linha[linha.size() - 1] == ' ') {
-      linha = linha.substr(0, linha.size() - 1);
+    for (auto token : linha) {
+      file << token;
     }
-    if (linha.size() > 0) file << linha << endl;
+    file << endl;
   }
 
   // Feche o arquivo
