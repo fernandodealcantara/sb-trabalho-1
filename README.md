@@ -13,7 +13,7 @@ Para compilar o programa em debug, basta executar o comando `make debug` na raiz
 A compilação em debug irá mostrar mensagens de todos os passos do programa no terminal.
 
 Também é possível compilar o montador diretamente tanto no Linux quanto no Windows:
-g++ main.cpp pre.cpp mcr.cpp obj.cpp analises.cpp utilitarios.cpp tipos.cpp -o montador
+g++ main.cpp src/pre.cpp src/mcr.cpp src/obj.cpp src/analises.cpp src/utilitarios.cpp src/tipos.cpp -o montador
 
 Caso queira compilar o montador em debug, basta adicionar a flag `-DDEBUG` ao comando acima.
 
@@ -33,7 +33,7 @@ make run op=-p file=bin
 make debug
 make run op=-p file=bin
 ### Execução direta
-g++ main.cpp pre.cpp mcr.cpp obj.cpp analises.cpp utilitarios.cpp tipos.cpp -o montador
+g++ main.cpp src/pre.cpp src/mcr.cpp src/obj.cpp src/analises.cpp src/utilitarios.cpp src/tipos.cpp -o montador
 Linux: ./montador -p bin
 Windows: .\montador.exe -p bin
 
