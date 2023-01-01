@@ -1,5 +1,5 @@
 op=-o
-file=asm_testes/bin
+file=bin
 
 all: build run
 
