@@ -73,13 +73,18 @@ Codigo subtituirMacros(const Codigo& codigo, const MNTMap& mnt, const Codigo& md
           corpoMDT.push_back(mdt[linhaMacro]);
           ++linhaMacro;
         }
+        // remover virgulas dos parametros
+        LinhaCodigo linhaPilhaSemVirgulas;
+        for (auto token : linhaPilha) {
+          if (token != ",") linhaPilhaSemVirgulas.push_back(token);
+        }
 
         // substituir parametros
         for (int i = 0; i < corpoMDT.size(); ++i) {          // para cada linha do corpo da macro
           for (int j = 0; j < corpoMDT[i].size(); ++j) {     // para cada token da linha
             if (regex_match(corpoMDT[i][j], reParametro)) {  // se o token é um parametro
               int indexParametro = stoi(corpoMDT[i][j].substr(1));  // indice do parametro
-              corpoMDT[i][j] = linhaPilha.at(indexParametro);  // substitui o parametro pelo valor
+              corpoMDT[i][j] = linhaPilhaSemVirgulas.at(indexParametro);  // substitui o parametro pelo valor
             }
           }
         }
