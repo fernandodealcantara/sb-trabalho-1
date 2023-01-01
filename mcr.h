@@ -1,10 +1,10 @@
 #ifndef MCR_H
 #define MCR_H
 
+#include <cstring>
 #include <iostream>
 #include <regex>
 #include <vector>
-#include <cstring>
 
 #include "tipos.h"
 #include "utilitarios.h"

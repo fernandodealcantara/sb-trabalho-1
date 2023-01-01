@@ -2,9 +2,9 @@
 #define ANALISES_H
 
 #include <regex>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 #include "tipos.h"
 #include "utilitarios.h"

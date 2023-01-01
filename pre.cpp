@@ -1,5 +1,6 @@
 #include "pre.h"
 
+// remove comentarios, espaços, quebra linhas e transforma no formato de lista
 Codigo processarLinhas(string conteudo) {
   // Imprima o conteúdo linha a linha
   istringstream stream(conteudo);
@@ -27,12 +28,11 @@ Codigo processarLinhas(string conteudo) {
   return codigo;
 }
 
-// tokens validos
+// quebrar linha em tokens
 LinhaCodigo tokenize(const string& str) {
   LinhaCodigo tokens;
   string token;
 
-  int i = 0;
   for (char c : str) {
     if (c == ';') {
       break;
