@@ -59,46 +59,49 @@ LinhaCodigo tokenize(const string& str) {
 
 Codigo processarEquates(const Codigo& codigo) {
   Codigo codigoProcessado;
-  map<string, string> equMap;
-  vector<int> linhasIgnorar;
+  map<string, string> equMap;  // map de equates -> label_equate: valor
+  vector<int> linhasIgnorar;   // indices das linhas que devem ser ignoradas
 
   for (auto linha = codigo.begin(); linha != codigo.end(); ++linha) {
     LinhaCodigo linha_codigo = *linha;
-    // percerrer até encontrar SECTION
+    // percerrer até encontrar SECTION TEXT
     if (linha_codigo.size() >= 2 && regex_match(linha_codigo[0], reSection) &&
         regex_match(linha_codigo[1], reText)) {
       break;
     }
+    // se for label
     if (linha_codigo.size() == 2 && regex_match(linha_codigo[0], reLabel) &&
         linha_codigo[1] == ":") {
-      string label = linha_codigo[0];
-      int linhaLabel = linha - codigo.begin();
+      string label = linha_codigo[0];           // possivel label
+      int linhaLabel = linha - codigo.begin();  // linha do label
       ++linha;
       if (linha == codigo.end()) {
         break;
       }
 
-      linha_codigo = *linha;
+      linha_codigo = *linha;  // possivel equ
+      // se for equ
       if (linha_codigo.size() == 2 && regex_match(linha_codigo[0], reEqu) &&
           regex_match(linha_codigo[1], reValue)) {
-        equMap[label] = linha_codigo[1];
-        linhasIgnorar.push_back(linhaLabel);
-        linhasIgnorar.push_back(linha - codigo.begin());
+        equMap[label] = linha_codigo[1];                  // adicionar ao map -> label_equate: valor
+        linhasIgnorar.push_back(linhaLabel);              // adicionar linha do label para ignorar
+        linhasIgnorar.push_back(linha - codigo.begin());  // adicionar linha do equate para ignorar
       }
     }
   }
-
+  // percorrer o codigo e substituir equates e remover linhas ignoradas
   for (int i = 0; i < codigo.size(); ++i) {
+    // se for linha a ser ignorada pular
     if (find(linhasIgnorar.begin(), linhasIgnorar.end(), i) != linhasIgnorar.end()) {
       continue;
     }
-    LinhaCodigo linha_codigo = codigo[i];
-    for (int j = 0; j < linha_codigo.size(); ++j) {
-      if (equMap.find(linha_codigo[j]) != equMap.end()) {
-        linha_codigo[j] = equMap[linha_codigo[j]];
+    LinhaCodigo linha_codigo = codigo[i];                  // linha do codigo
+    for (int j = 0; j < linha_codigo.size(); ++j) {        // percorrer tokens da linha
+      if (equMap.find(linha_codigo[j]) != equMap.end()) {  // se for equate substituir
+        linha_codigo[j] = equMap[linha_codigo[j]];         // substituir pelo valor
       }
     }
-    codigoProcessado.push_back(linha_codigo);
+    codigoProcessado.push_back(linha_codigo);  // adicionar linha ao codigo processado
   }
 
   return codigoProcessado;
@@ -106,27 +109,28 @@ Codigo processarEquates(const Codigo& codigo) {
 
 Codigo processarIfs(const Codigo& codigo) {
   Codigo codigoProcessado;
-  vector<int> linhasIgnorar;
+  vector<int> linhasIgnorar;  // indices das linhas que devem ser ignoradas
 
   for (auto linha = codigo.begin(); linha != codigo.end(); ++linha) {
     LinhaCodigo linha_codigo = *linha;
-
+    // se for if
     if (linha_codigo.size() >= 2 && regex_match(linha_codigo[0], reIf)) {
-      int linhaIf = linha - codigo.begin();
-      linhasIgnorar.push_back(linhaIf);
-
+      int linhaIf = linha - codigo.begin();  // linha do if
+      linhasIgnorar.push_back(linhaIf);      // adicionar linha do if para ignorar
+      // se for valor valido e for 0 ignorar proxima linha
       if (regex_match(linha_codigo[1], reValue) && stoi(linha_codigo[1]) == 0) {
         ++linha;
         if (linha == codigo.end()) {
           break;
         }
-        linha_codigo = *linha;
         linhasIgnorar.push_back(linha - codigo.begin());
       }
     }
   }
 
+  // percorrer o codigo e remover linhas ignoradas
   for (int i = 0; i < codigo.size(); ++i) {
+    // se for linha a ser ignorada pular
     if (find(linhasIgnorar.begin(), linhasIgnorar.end(), i) != linhasIgnorar.end()) {
       continue;
     }
