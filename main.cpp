@@ -4,12 +4,12 @@
 #include <stdexcept>
 #include <vector>
 
-#include "analises.h"
-#include "mcr.h"
-#include "obj.h"
-#include "pre.h"
-#include "tipos.h"
-#include "utilitarios.h"
+#include "src/analises.h"
+#include "src/mcr.h"
+#include "src/obj.h"
+#include "src/pre.h"
+#include "src/tipos.h"
+#include "src/utilitarios.h"
 // O executável deve ser chamado de MONTADOR. E deve ter 3 modos de uso. Deve
 // ser possível chamar por linha de comando da seguinte forma: ./montador -<op>
 // <arquivo> O arquivo de entrada deve ser indicado SEM extensão e o arquivo de

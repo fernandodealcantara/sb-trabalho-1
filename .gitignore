@@ -1,4 +1,4 @@
-montador
-asm_testes/*.mcr
-asm_testes/*.obj
-asm_testes/*.pre
+montador*
+*.mcr
+*.obj
+*.pre
