@@ -72,8 +72,6 @@ void salvarArquivo(string arquivo, const Codigo& codigo) {
     if (linha.size() > 0) file << linha << endl;
   }
 
-  file << endl;
-
   // Feche o arquivo
   file.close();
 }
