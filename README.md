@@ -22,7 +22,7 @@ Para executar o programa, basta executar o comando `make run op=<op> file=<file>
 Onde `<op>` é a operação a ser realizada, podendo ser `-p`, `-m` ou `-o`. Note o uso do hífen antes da opção.
 E `<file>` é o caminho do arquivo a ser utilizado (não informar a extensão do arquivo).
 
-Também é possível rodar o montador diretamente (no Windows, basta executar o arquivo montador.exe):
+Também é possível rodar o montador diretamente (no Windows, deve executar o arquivo montador.exe):
 ./montador <op> <file>
 
 ## Exemplo
