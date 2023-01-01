@@ -76,6 +76,18 @@ void salvarArquivo(string arquivo, const Codigo& codigo) {
   file.close();
 }
 
+void salvarArquivoObjeto(string nome_arquivo, const vector<string>& codigoObjeto) {
+  // Salvar arquivo
+  ofstream file(nome_arquivo);
+  if (!file.is_open()) {
+    throw runtime_error("Error opening file");
+  }
+  for (int i = 0; i < codigoObjeto.size(); i++) {
+    file << codigoObjeto[i] << " ";
+  }
+  file.close();
+}
+
 void dumpMap(const LinhaMap& linhas) {
   for (auto it = linhas.begin(); it != linhas.end(); ++it) {
     cout << it->first << " => ";

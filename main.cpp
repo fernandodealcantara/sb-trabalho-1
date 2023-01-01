@@ -74,15 +74,7 @@ int main(int argc, char* argv[]) {
 #endif
 
   if (op == 'o') {
-    // Salvar arquivo
-    ofstream file(nome_arquivo + ".obj");
-    if (!file.is_open()) {
-      throw runtime_error("Error opening file");
-    }
-    for (int i = 0; i < codigoObjeto.size(); i++) {
-      file << codigoObjeto[i] << " ";
-    }
-    file.close();
+    salvarArquivoObjeto(nome_arquivo + ".obj", codigoObjeto);
     return 0;
   }
 

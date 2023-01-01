@@ -16,6 +16,7 @@ using namespace std;
 int verificarArgumentos(int argc, char* argv[]);
 string lerArquivo(string arquivo);
 void salvarArquivo(string arquivo, const Codigo& codigo);
+void salvarArquivoObjeto(string nome_arquivo, const vector<string>& codigoObjeto);
 void dumpMap(const LinhaMap& linhas);
 void dumpMnt(const MNTMap& mnt);
 void dumpCodigo(const Codigo& codigo);
