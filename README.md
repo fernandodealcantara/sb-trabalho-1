@@ -55,6 +55,7 @@ Windows: .\montador.exe -p bin
 Linux:
 - Sistema operacional utilizado: Ubuntu 22.04.1 LTS
 - Compilador utilizado: g++ (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0
+
 Windows:
 - Sistema operacional utilizado: Windows 10 Pro 22H2
 - Compilador utilizado: g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders) 11.2.0
